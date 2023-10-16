@@ -42,15 +42,23 @@ builder.Services.AddAuthentication(options =>
 //https://learn.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-7.0
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "CorsPolicy",
-        policy  =>
+    var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+    if (origins != null && origins.Length > 0)
+    {
+        options.AddPolicy(name: "CorsPolicy", policy =>
         {
-            policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>())
+            policy.WithOrigins(origins)
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
+    }
+    else
+    {
+        options.AddPolicy(name: "CorsPolicy", policy =>
+        {
+        });
+    }
 });
-
 
 
 var app = builder.Build();
