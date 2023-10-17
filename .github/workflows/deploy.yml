@@ -1,0 +1,61 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Deploy to HBI
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: "Test"
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
+  build:
+    name: "Build Image"
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
+      - run: docker login -u "${{ secrets.REGISTRY_USERNAME }}" -p "${{ secrets.REGISTRY_PASSWORD }}" ${{ secrets.REGISTRY_ADDRESS }}
+      - uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: ${{ secrets.REGISTRY_ADDRESS }}/ohtapi:latest
+      - run: |
+          mkdir -p $HOME/docker-image
+          docker save -o $HOME/docker-image/image.tar ${{ secrets.REGISTRY_ADDRESS }}/ohtapi:latest
+  push:
+    name: "Push Image"
+    needs: [build, test]
+    runs-on: [self-hosted, linux]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Load Docker image
+        run: docker load -i $HOME/docker-image/image.tar
+      - name: Login to HBI Container Registry
+        run: docker login -u "${{ secrets.REGISTRY_USERNAME }}" -p "${{ secrets.REGISTRY_PASSWORD }}" ${{ secrets.REGISTRY_ADDRESS }}
+      - name: Push
+        run: docker push ${{ secrets.REGISTRY_ADDRESS }}/ohtapi:latest
+      - name: Deploy to HBI Server
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: ${{ secrets.WEBHOOK }}
+          method: 'POST'
