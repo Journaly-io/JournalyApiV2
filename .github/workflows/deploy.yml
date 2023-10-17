@@ -22,7 +22,7 @@ jobs:
       - run: docker login -u "${{ secrets.REGISTRY_USERNAME }}" -p "${{ secrets.REGISTRY_PASSWORD }}" ${{ secrets.REGISTRY_ADDRESS }}
       - uses: docker/build-push-action@v4
         with:
-          context: ./JournalyApiV2
+          context: .
           platforms: linux/amd64
           push: false
           load: true
