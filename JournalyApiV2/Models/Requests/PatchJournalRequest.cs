@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace JournalyApi.Models.Requests;
+﻿namespace JournalyApiV2.Models.Requests;
 
 public class PatchJournalRequest
 {

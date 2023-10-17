@@ -1,4 +1,5 @@
-﻿using JournalyApiV2.Models.Requests;
+﻿using JournalyApiV2.Data.Models;
+using JournalyApiV2.Models.Requests;
 
 namespace JournalyApiV2.Services.BLL;
 
