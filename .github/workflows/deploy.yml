@@ -27,7 +27,7 @@ jobs:
           platforms: linux/amd64
           push: false
           load: true
-          tags: ${{ secrets.REGISTRY_ADDRESS }}/ohtapi:latest
+          tags: ${{ secrets.REGISTRY_ADDRESS }}/journalyapi:latest
       - run: |
           mkdir -p $HOME/docker-image
           docker save -o $HOME/docker-image/image.tar ${{ secrets.REGISTRY_ADDRESS }}/journalyapi:latest
@@ -43,7 +43,7 @@ jobs:
       - name: Login to HBI Container Registry
         run: docker login -u "${{ secrets.REGISTRY_USERNAME }}" -p "${{ secrets.REGISTRY_PASSWORD }}" ${{ secrets.REGISTRY_ADDRESS }}
       - name: Push
-        run: docker push ${{ secrets.REGISTRY_ADDRESS }}/ohtapi:latest
+        run: docker push ${{ secrets.REGISTRY_ADDRESS }}/journalyapi:latest
       - name: Deploy to HBI Server
         uses: fjogeleit/http-request-action@v1
         with:
