@@ -21,6 +21,9 @@
 
     <ItemGroup>
       <Folder Include="Controllers\" />
+      <Folder Include="Data\Models\" />
+      <Folder Include="Models\Requests\" />
+      <Folder Include="Models\Responses\" />
     </ItemGroup>
 
 </Project>
