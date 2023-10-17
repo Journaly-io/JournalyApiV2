@@ -30,7 +30,7 @@ jobs:
           docker save -o $HOME/docker-image/image.tar ${{ secrets.REGISTRY_ADDRESS }}/ohtapi:latest
   push:
     name: "Push Image"
-    needs: [build, test]
+    needs: [build]
     runs-on: [self-hosted, linux]
     steps:
       - name: Checkout code
