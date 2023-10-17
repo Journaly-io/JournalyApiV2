@@ -30,7 +30,7 @@ jobs:
           tags: ${{ secrets.REGISTRY_ADDRESS }}/ohtapi:latest
       - run: |
           mkdir -p $HOME/docker-image
-          docker save -o $HOME/docker-image/image.tar ${{ secrets.REGISTRY_ADDRESS }}/ohtapi:latest
+          docker save -o $HOME/docker-image/image.tar ${{ secrets.REGISTRY_ADDRESS }}/journalyapi:latest
   push:
     name: "Push Image"
     needs: [build]
