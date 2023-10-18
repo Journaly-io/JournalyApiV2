@@ -18,7 +18,8 @@ public class JournalService : IJournalService
     public async Task PatchJournal(PatchJournalRequest request, Guid owner)
     {
         await Task.WhenAll(
-            _journalDbService.SyncCategories(request.Categories, owner)
+            _journalDbService.SyncCategories(request.Categories, owner),
+            _journalDbService.SyncEmotions(request.Emotions, owner)
         );
     }
 }

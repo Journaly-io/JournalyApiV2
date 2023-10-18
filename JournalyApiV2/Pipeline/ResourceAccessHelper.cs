@@ -21,11 +21,19 @@ public class ResourceAccessHelper : IResourceAccessHelper
         var dbCategory = await _db.EmotionCategories.FindAsync(category);
         if (dbCategory == null) return; // This is a new category, so the user inherently has access
         if (dbCategory.Owner == userId) return;
-        throw new NoAccessException();
+        throw new IResourceAccessHelper.NoAccessException();
     }
 
-    public class NoAccessException : Exception
+    public async Task ValidateEmotionAccess(Guid userId, params Guid[] emotions)
     {
-        
+        await Task.WhenAll(emotions.Select(x => Task.Run(() => ValidateSingleEmotion(x, userId))));
+    }
+
+    private async Task ValidateSingleEmotion(Guid emotion, Guid userId)
+    {
+        var dbEmotion = await _db.Emotions.FindAsync(emotion);
+        if (dbEmotion == null) return; // This is a new emotion, so the user inherently has access
+        if (dbEmotion.Owner == userId) return;
+        throw new IResourceAccessHelper.NoAccessException();
     }
 }

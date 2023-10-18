@@ -24,10 +24,11 @@ public class JournalController : JournalyControllerBase
         try
         {
             await Task.WhenAll(
-                Task.Run(() => _resourceAccessHelper.ValidateCategoryAccess(GetUserId(), request.Categories.Select(x => x.Uuid).ToArray()))
+                Task.Run(() => _resourceAccessHelper.ValidateCategoryAccess(GetUserId(), request.Categories.Select(x => x.Uuid).ToArray())),
+                Task.Run(() => _resourceAccessHelper.ValidateEmotionAccess(GetUserId(), request.Emotions.Select(x => x.Uuid).ToArray()))
             );
         }
-        catch (ResourceAccessHelper.NoAccessException)
+        catch (IResourceAccessHelper.NoAccessException)
         {
             return StatusCode(403);
         }

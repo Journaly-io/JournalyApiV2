@@ -3,4 +3,10 @@
 public interface IResourceAccessHelper
 {
     Task ValidateCategoryAccess(Guid userId, params Guid[] emotionCategories);
+    Task ValidateEmotionAccess(Guid userId, params Guid[] emotions);
+
+    class NoAccessException : Exception
+    {
+        
+    }
 }

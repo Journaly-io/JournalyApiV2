@@ -19,12 +19,12 @@ public class PatchJournalRequest
     public class EmotionPatch
     {
         public Guid Uuid { get; set; } 
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public Guid? Category { get; set; }
         public string? Icon { get; set; }
         public string? IconType { get; set; }
         public short? Order { get; set; }
-        public bool Deleted { get; set; } = false;
+        public bool? Deleted { get; set; } = false;
     }
 
     public class ActivityPatch
