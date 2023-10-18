@@ -27,6 +27,7 @@ public class Emotion
     public short Order { get; set; }
     
     [Column("CategoryUuid")]
+    [ForeignKey("EmotionCategory")] // It will try to do EmotionCategoryUuid if we dont specify
     public Guid CategoryUuid { get; set; }
     
     [Column("Deleted")]
