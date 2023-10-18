@@ -19,7 +19,8 @@ public class JournalService : IJournalService
     {
         await Task.WhenAll(
             _journalDbService.SyncCategories(request.Categories, owner),
-            _journalDbService.SyncEmotions(request.Emotions, owner)
+            _journalDbService.SyncEmotions(request.Emotions, owner),
+            _journalDbService.SyncActivities(request.Activities, owner)
         );
     }
 }

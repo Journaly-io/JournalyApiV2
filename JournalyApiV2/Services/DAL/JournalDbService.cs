@@ -82,4 +82,32 @@ public class JournalDbService : IJournalDbService
     {
         return (await _db.IconType.SingleAsync(x => x.Name == name)).Id;
     }
+
+    public async Task SyncActivities(PatchJournalRequest.ActivityPatch[] activities, Guid owner)
+    {
+        var tasks = activities.Select(activity => Task.Run(() => SyncSingleActivity(activity, owner)));
+        await Task.WhenAll(tasks);
+    }
+
+    public async Task SyncSingleActivity(PatchJournalRequest.ActivityPatch activity, Guid owner)
+    {
+        var dbActivity = await _db.Activities.FindAsync(activity.Uuid);
+        if (dbActivity == null)
+        {
+            dbActivity = new Data.Models.Activity
+            {
+                Uuid = activity.Uuid,
+                Owner = owner
+            };
+            await _db.Activities.AddAsync(dbActivity);
+        }
+
+        if (activity.Deleted != null) dbActivity.Deleted = activity.Deleted.Value;
+        if (activity.IconType != null) dbActivity.IconTypeId = await GetIconTypeIdByName(activity.IconType);
+        if (activity.Name != null) dbActivity.Name = activity.Name;
+        if (activity.Order != null) dbActivity.Order = activity.Order.Value;
+        if (activity.Icon != null) dbActivity.Icon = activity.Icon;
+
+        await _db.SaveChangesAsync();
+    }
 }

@@ -24,9 +24,16 @@ public class JournalController : JournalyControllerBase
         try
         {
             await Task.WhenAll(
-                Task.Run(() => _resourceAccessHelper.ValidateCategoryAccess(GetUserId(), request.Categories.Select(x => x.Uuid).ToArray())),
-                Task.Run(() => _resourceAccessHelper.ValidateEmotionAccess(GetUserId(), request.Emotions.Select(x => x.Uuid).ToArray()))
-            );
+                Task.Run(() =>
+                    _resourceAccessHelper.ValidateCategoryAccess(GetUserId(),
+                        request.Categories.Select(x => x.Uuid).ToArray())),
+                Task.Run(() =>
+                    _resourceAccessHelper.ValidateEmotionAccess(GetUserId(),
+                        request.Emotions.Select(x => x.Uuid).ToArray())),
+                Task.Run(() =>
+                    _resourceAccessHelper.ValidateActivityAccess(GetUserId(),
+                        request.Activities.Select(x => x.Uuid).ToArray()))
+                );
         }
         catch (IResourceAccessHelper.NoAccessException)
         {

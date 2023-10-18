@@ -9,4 +9,6 @@ public interface IResourceAccessHelper
     {
         
     }
+
+    Task ValidateActivityAccess(Guid userId, params Guid[] activities);
 }

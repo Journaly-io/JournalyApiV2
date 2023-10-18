@@ -36,4 +36,17 @@ public class ResourceAccessHelper : IResourceAccessHelper
         if (dbEmotion.Owner == userId) return;
         throw new IResourceAccessHelper.NoAccessException();
     }
+
+    public async Task ValidateActivityAccess(Guid userId, params Guid[] activities)
+    {
+        await Task.WhenAll(activities.Select(x => Task.Run(() => ValidateSingleActivity(x, userId))));
+    }
+
+    private async Task ValidateSingleActivity(Guid activity, Guid userId)
+    {
+        var dbActivity = await _db.Activities.FindAsync(activity);
+        if (dbActivity == null) return; // This is a new activity, so the user inherently has access
+        if (dbActivity.Owner == userId) return;
+        throw new IResourceAccessHelper.NoAccessException();
+    }
 }

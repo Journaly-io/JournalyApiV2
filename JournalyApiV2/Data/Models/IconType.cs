@@ -16,4 +16,5 @@ public class IconType
     
     // Navigation properties
     public ICollection<Emotion> Emotions { get; }
+    public ICollection<Activity> Activities { get; }
 }
