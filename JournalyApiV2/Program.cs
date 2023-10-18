@@ -1,6 +1,7 @@
 using System.Security.Cryptography.X509Certificates;
 using JournalyApiV2.Data;
 using JournalyApiV2.Services.BLL;
+using JournalyApiV2.Services.DAL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -63,6 +64,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<IJournalService, JournalService>();
+builder.Services.AddScoped<IJournalDbService, JournalDbService>();
 builder.Services.AddDbContext<JournalyDbContext>();
 
 

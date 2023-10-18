@@ -15,6 +15,8 @@ public class JournalService : IJournalService
 
     public async Task PatchJournal(PatchJournalRequest request)
     {
-        
+        await Task.WhenAll(
+            _journalDbService.SyncCategories(request.Categories)
+        );
     }
 }
