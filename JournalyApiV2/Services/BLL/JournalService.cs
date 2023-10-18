@@ -1,9 +1,11 @@
 ﻿using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models.Requests;
 using JournalyApiV2.Services.DAL;
+using Microsoft.AspNetCore.Authorization;
 
 namespace JournalyApiV2.Services.BLL;
 
+[Authorize]
 public class JournalService : IJournalService
 {
     private readonly IJournalDbService _journalDbService;

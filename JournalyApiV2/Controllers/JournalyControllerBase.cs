@@ -1,8 +1,10 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JournalyApiV2.Controllers;
 
+[Authorize]
 public class JournalyControllerBase : ControllerBase
 {
     protected Guid GetUserId()
