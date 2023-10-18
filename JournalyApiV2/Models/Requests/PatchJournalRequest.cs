@@ -10,11 +10,11 @@ public class PatchJournalRequest
     public class CategoryPatch
     {
         public Guid Uuid { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public short? Order { get; set; }
-        public bool Deleted { get; set; } = false;
+        public bool? Deleted { get; set; } = false;
         public bool? AllowMultiple { get; set; }
-        public bool Default { get; set; } = false;
+        public bool? Default { get; set; } = false;
     }
     public class EmotionPatch
     {
