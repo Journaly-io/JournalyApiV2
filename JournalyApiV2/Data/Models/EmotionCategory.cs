@@ -24,4 +24,7 @@ public class EmotionCategory
     
     [Column("Owner")]
     public Guid Owner { get; set; }
+    
+    // Navigation properties
+    public ICollection<Emotion> Emotions { get; }
 }

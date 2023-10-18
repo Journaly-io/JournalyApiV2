@@ -13,6 +13,7 @@ public class JournalDbService : IJournalDbService
         _db = db;
     }
     
+    // Categories
     public async Task SyncCategories(PatchJournalRequest.CategoryPatch[] categories, Guid owner)
     {
         var tasks = categories.Select(emotionCategory => Task.Run(() => SyncSingleCategory(emotionCategory, owner))).ToArray();
@@ -39,5 +40,17 @@ public class JournalDbService : IJournalDbService
         if (emotionCategory.Order != null) category.Order = emotionCategory.Order.Value;
 
         await _db.SaveChangesAsync();
+    }
+    
+    // Emotions
+    public async Task SyncEmotions(PatchJournalRequest.EmotionPatch[] emotions, Guid owner)
+    {
+        var tasks = emotions.Select(emotion => Task.Run(() => SyncSingleEmotion(emotion, owner)));
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task SyncSingleEmotion(PatchJournalRequest.EmotionPatch emotion, Guid owner)
+    {
+        
     }
 }

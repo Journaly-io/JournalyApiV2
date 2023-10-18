@@ -8,6 +8,8 @@ public class JournalyDbContext : DbContext
     private readonly IConfiguration _config;
 
     public DbSet<EmotionCategory> EmotionCategories { get; set; }
+    public DbSet<Emotion> Emotions { get; set; }
+    public DbSet<IconType> IconType { get; set; }
     
     public JournalyDbContext(IConfiguration config)
     {
