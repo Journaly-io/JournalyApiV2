@@ -26,7 +26,7 @@ public class JournalDbService : IJournalDbService
         {
             category = new Data.Models.EmotionCategory
             {
-                Uuid = category.Uuid,
+                Uuid = emotionCategory.Uuid,
                 Owner = owner
             };
             await _db.EmotionCategories.AddAsync(category);
