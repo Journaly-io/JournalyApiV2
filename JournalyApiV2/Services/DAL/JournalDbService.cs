@@ -13,20 +13,23 @@ public class JournalDbService : IJournalDbService
         _db = db;
     }
     
-    public async Task SyncCategories(PatchJournalRequest.CategoryPatch[] categories)
+    public async Task SyncCategories(PatchJournalRequest.CategoryPatch[] categories, Guid owner)
     {
-        var tasks = categories.Select(emotionCategory => Task.Run(() => SyncSingleCategory(emotionCategory))).ToArray();
+        var tasks = categories.Select(emotionCategory => Task.Run(() => SyncSingleCategory(emotionCategory, owner))).ToArray();
         await Task.WhenAll(tasks);
     }
 
-    private async Task SyncSingleCategory(PatchJournalRequest.CategoryPatch emotionCategory)
+    private async Task SyncSingleCategory(PatchJournalRequest.CategoryPatch emotionCategory, Guid owner)
     {
         var category = await _db.EmotionCategories.FindAsync(emotionCategory.Uuid);
-        if (category == null)
+        if (category == null) // New category
         {
-            category = new Data.Models.EmotionCategory();
+            category = new Data.Models.EmotionCategory
+            {
+                Owner = owner
+            };
             await _db.EmotionCategories.AddAsync(category);
-        } // New category
+        }
 
         if (emotionCategory.AllowMultiple != null) category.AllowMultiple = emotionCategory.AllowMultiple.Value;
         if (emotionCategory.Default != null) category.Default = emotionCategory.Default.Value;

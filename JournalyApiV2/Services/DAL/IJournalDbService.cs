@@ -5,5 +5,5 @@ namespace JournalyApiV2.Services.DAL;
 
 public interface IJournalDbService
 {
-    Task SyncCategories(PatchJournalRequest.CategoryPatch[] categories);
+    Task SyncCategories(PatchJournalRequest.CategoryPatch[] categories, Guid owner);
 }

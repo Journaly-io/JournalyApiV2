@@ -13,10 +13,10 @@ public class JournalService : IJournalService
         _journalDbService = journalDbService;
     }
 
-    public async Task PatchJournal(PatchJournalRequest request)
+    public async Task PatchJournal(PatchJournalRequest request, Guid owner)
     {
         await Task.WhenAll(
-            _journalDbService.SyncCategories(request.Categories)
+            _journalDbService.SyncCategories(request.Categories, owner)
         );
     }
 }

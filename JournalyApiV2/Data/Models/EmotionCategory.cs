@@ -21,5 +21,7 @@ public class EmotionCategory
 
     [Column("Deleted")]
     public bool Deleted { get; set; } = false;
-
+    
+    [Column("Owner")]
+    public Guid Owner { get; set; }
 }
