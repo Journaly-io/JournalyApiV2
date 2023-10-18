@@ -41,7 +41,20 @@ namespace JournalyApiV2.Data.Migrations
                 {
                     table.PrimaryKey("PK_IconType", x => x.Id);
                 });
+            
+            // Seed the IconType table with default values
+            migrationBuilder.InsertData(
+                table: "IconType",
+                columns: new[] { "Id", "Name" },
+                values: new object[] { 1, "twemoji" }
+            );
 
+            migrationBuilder.InsertData(
+                table: "IconType",
+                columns: new[] { "Id", "Name" },
+                values: new object[] { 2, "fontawesome" }
+            );
+            
             migrationBuilder.CreateTable(
                 name: "Emotion",
                 columns: table => new
