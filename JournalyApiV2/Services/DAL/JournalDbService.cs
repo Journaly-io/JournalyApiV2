@@ -129,6 +129,7 @@ public class JournalDbService : IJournalDbService
                 EmotionEntries = new List<EmotionEntry>(),
                 JournalEntryCategoryValues = new List<JournalEntryCategoryValue>()
             };
+            await _db.JournalEntries.AddAsync(dbJournalEntry);
         }
 
         // Handle the easy stuff first - the direct properties of the journal entry
