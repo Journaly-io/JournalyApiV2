@@ -46,7 +46,20 @@ public class AuthService : IAuthService
         {
             // Refresh and try again
             await RefreshToken();
-            response = await client.SendAsync(request);
+
+            // Create a new HttpRequestMessage instance with the same properties as the original request (you cant resend a request)
+            var newRequest = new HttpRequestMessage(request.Method, request.RequestUri)
+            {
+                Content = request.Content,
+                Version = request.Version
+            };
+            foreach (var header in request.Headers)
+            {
+                newRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+            newRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            response = await client.SendAsync(newRequest);
         }
 
         return response;
