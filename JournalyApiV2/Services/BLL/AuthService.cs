@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace JournalyApiV2.Services.BLL;
 
-public class AuthService
+public class AuthService : IAuthService
 {
     private static string token;
     private static DateTime tokenExpiration;
@@ -56,8 +56,8 @@ public class AuthService
     {
         var client = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Post,
-            new Uri(new Uri(_config.GetSection("IdentityStore").GetValue<string>("Authority")),
-                "protocol/openid-connect/auth")); // TODO: pull from .well_known
+            new Uri(_config.GetSection("IdentityStore").GetValue<string>("Authority"))
+                + "protocol/openid-connect/token"); // TODO: pull from .well_known
         var collection = new List<KeyValuePair<string, string>>();
         collection.Add(new("grant_type", "client_credentials"));
         collection.Add(new("client_id", _config.GetSection("IdentityStore").GetValue<string>("ClientId")));
