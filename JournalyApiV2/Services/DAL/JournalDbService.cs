@@ -124,7 +124,10 @@ public class JournalDbService : IJournalDbService
             dbJournalEntry = new Data.Models.JournalEntry
             {
                 Uuid = entry.Uuid,
-                Owner = owner
+                Owner = owner,
+                ActivityEntries = new List<ActivityEntry>(),
+                EmotionEntries = new List<EmotionEntry>(),
+                JournalEntryCategoryValues = new List<JournalEntryCategoryValue>()
             };
         }
 
@@ -147,12 +150,18 @@ public class JournalDbService : IJournalDbService
         }
 
         // Remove any removed emotions
+        var emotionsToRemove = new List<EmotionEntry>();
         foreach (var emotionEntry in dbJournalEntry.EmotionEntries)
         {
             if (!entry.Emotions.Contains(emotionEntry.EmotionUuid))
             {
-                dbJournalEntry.EmotionEntries.Remove(emotionEntry);
+                emotionsToRemove.Add(emotionEntry);
             }
+        }
+
+        foreach (var emotionEntry in emotionsToRemove)
+        {
+            dbJournalEntry.EmotionEntries.Remove(emotionEntry);
         }
 
         // Handle activities
@@ -170,13 +179,58 @@ public class JournalDbService : IJournalDbService
         }
 
         // Remove any removed activities
+        var activitiesToRemove = new List<ActivityEntry>();
         foreach (var activityEntry in dbJournalEntry.ActivityEntries)
         {
-            if (!entry.Emotions.Contains(activityEntry.ActivityUuid))
+            if (!entry.Activities.Contains(activityEntry.ActivityUuid))
             {
-                dbJournalEntry.ActivityEntries.Remove(activityEntry);
+                activitiesToRemove.Add(activityEntry);
             }
         }
+
+        foreach (var activityEntry in activitiesToRemove)
+        {
+            dbJournalEntry.ActivityEntries.Remove(activityEntry);
+        }
+        
+        // Finally, the hard part. Handle category values
+        // Handle new/updated entries
+        foreach (var categoryValue in entry.CategoryValues)  
+        {
+            // Check if it already exists
+            var existing =
+                dbJournalEntry.JournalEntryCategoryValues.SingleOrDefault(x => x.CategoryUuid == categoryValue.Uuid);
+            if (existing != null) // It does, make sure its up to date
+            {
+                existing.Value = categoryValue.Value;
+            }
+            else // It does not - create it
+            {
+                dbJournalEntry.JournalEntryCategoryValues.Add(new JournalEntryCategoryValue
+                {
+                    CategoryUuid = categoryValue.Uuid,
+                    JournalEntryUuid = dbJournalEntry.Uuid,
+                    Value = categoryValue.Value
+                });
+            }
+        }
+        // Handle removed entries
+        var categoryValuesToRemove = new List<JournalEntryCategoryValue>();
+        foreach (var journalEntryCategoryValue in dbJournalEntry.JournalEntryCategoryValues)
+        {
+            if (!entry.CategoryValues.Select(x => x.Uuid).Contains(journalEntryCategoryValue.CategoryUuid))
+            {
+                categoryValuesToRemove.Add(journalEntryCategoryValue);
+            }
+        }
+
+        foreach (var categoryValue in categoryValuesToRemove)
+        {
+            dbJournalEntry.JournalEntryCategoryValues.Remove(categoryValue);
+        }
+        
+        // Finally, save everything
+        await _db.SaveChangesAsync();
     }
 
 
