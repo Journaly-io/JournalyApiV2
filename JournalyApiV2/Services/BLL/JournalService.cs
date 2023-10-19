@@ -23,7 +23,7 @@ public class JournalService : IJournalService
                 _journalDbService.SyncEmotions(request.Emotions, owner, deviceId),
                 _journalDbService.SyncActivities(request.Activities, owner, deviceId)
             );
-            await _journalDbService.SyncJournalEntries(request.JournalEntries, owner, deviceId) // Must come last due to database constraints
-        );
+            await _journalDbService.SyncJournalEntries(request.JournalEntries, owner,
+                deviceId); // Must come last due to database constraints
     }
 }
