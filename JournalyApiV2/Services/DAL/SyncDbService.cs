@@ -10,6 +10,11 @@ public class SyncDbService : ISyncDbService
 {
     private readonly IDbFactory _db;
 
+    public SyncDbService(IDbFactory db)
+    {
+        _db = db;
+    }
+
     public async Task MarkSynced(params RecordSync[] recordSyncs)
     {
         await using var db = _db.Journaly();
