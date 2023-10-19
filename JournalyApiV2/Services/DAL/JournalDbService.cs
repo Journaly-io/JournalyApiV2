@@ -1,4 +1,5 @@
 ﻿using JournalyApiV2.Data;
+using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
 using JournalyApiV2.Models.Requests;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +14,12 @@ public class JournalDbService : IJournalDbService
     {
         _db = db;
     }
-    
+
     // Categories
     public async Task SyncCategories(PatchJournalRequest.CategoryPatch[] categories, Guid owner)
     {
-        var tasks = categories.Select(emotionCategory => Task.Run(() => SyncSingleCategory(emotionCategory, owner))).ToArray();
+        var tasks = categories.Select(emotionCategory => Task.Run(() => SyncSingleCategory(emotionCategory, owner)))
+            .ToArray();
         await Task.WhenAll(tasks);
     }
 
@@ -42,7 +44,7 @@ public class JournalDbService : IJournalDbService
 
         await _db.SaveChangesAsync();
     }
-    
+
     // Emotions
     public async Task SyncEmotions(PatchJournalRequest.EmotionPatch[] emotions, Guid owner)
     {
@@ -59,7 +61,7 @@ public class JournalDbService : IJournalDbService
             {
                 throw new ArgumentException("New emotions must include a category uuid");
             }
-            
+
             dbEmotion = new Data.Models.Emotion
             {
                 Uuid = emotion.Uuid,
@@ -85,7 +87,7 @@ public class JournalDbService : IJournalDbService
         await Task.WhenAll(tasks);
     }
 
-    public async Task SyncSingleActivity(PatchJournalRequest.ActivityPatch activity, Guid owner)
+    private async Task SyncSingleActivity(PatchJournalRequest.ActivityPatch activity, Guid owner)
     {
         var dbActivity = await _db.Activities.FindAsync(activity.Uuid);
         if (dbActivity == null)
@@ -106,8 +108,78 @@ public class JournalDbService : IJournalDbService
 
         await _db.SaveChangesAsync();
     }
-    
-    
+
+    public async Task SyncJournalEntries(PatchJournalRequest.JournalPatch[] entries, Guid owner)
+    {
+        await Task.WhenAll(entries.Select(entry => Task.Run(() => SyncSingleJournalEntry(entry, owner))));
+    }
+
+    private async Task SyncSingleJournalEntry(PatchJournalRequest.JournalPatch entry, Guid owner)
+    {
+        var dbJournalEntry = await _db.JournalEntries.Include(x => x.ActivityEntries)
+            .Include(x => x.JournalEntryCategoryValues).Include(x => x.EmotionEntries)
+            .SingleOrDefaultAsync(x => x.Uuid == entry.Uuid);
+        if (dbJournalEntry == null)
+        {
+            dbJournalEntry = new Data.Models.JournalEntry
+            {
+                Uuid = entry.Uuid,
+                Owner = owner
+            };
+        }
+
+        // Handle the easy stuff first - the direct properties of the journal entry
+        dbJournalEntry.Body = entry.Body;
+        dbJournalEntry.Deleted = entry.Deleted;
+
+        // Handle emotions
+        // Add any missing emotions
+        foreach (var emotionEntry in entry.Emotions)
+        {
+            if (!dbJournalEntry.EmotionEntries.Select(x => x.EmotionUuid).Contains(emotionEntry))
+            {
+                dbJournalEntry.EmotionEntries.Add(new EmotionEntry
+                {
+                    EmotionUuid = emotionEntry,
+                    JournalEntryUuid = dbJournalEntry.Uuid
+                });
+            }
+        }
+
+        // Remove any removed emotions
+        foreach (var emotionEntry in dbJournalEntry.EmotionEntries)
+        {
+            if (!entry.Emotions.Contains(emotionEntry.EmotionUuid))
+            {
+                dbJournalEntry.EmotionEntries.Remove(emotionEntry);
+            }
+        }
+
+        // Handle activities
+        // Add any missing activities
+        foreach (var activityEntry in entry.Activities)
+        {
+            if (!dbJournalEntry.ActivityEntries.Select(x => x.ActivityUuid).Contains(activityEntry))
+            {
+                dbJournalEntry.ActivityEntries.Add(new ActivityEntry
+                {
+                    ActivityUuid = activityEntry,
+                    JournalEntryUuid = dbJournalEntry.Uuid
+                });
+            }
+        }
+
+        // Remove any removed activities
+        foreach (var activityEntry in dbJournalEntry.ActivityEntries)
+        {
+            if (!entry.Emotions.Contains(activityEntry.ActivityUuid))
+            {
+                dbJournalEntry.ActivityEntries.Remove(activityEntry);
+            }
+        }
+    }
+
+
     private async Task<short> GetIconTypeIdByName(string name)
     {
         return (await _db.IconType.SingleAsync(x => x.Name == name)).Id;

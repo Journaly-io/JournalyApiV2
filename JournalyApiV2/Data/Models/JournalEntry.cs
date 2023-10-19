@@ -17,6 +17,12 @@ public class JournalEntry
     [Column("Owner")]
     public Guid Owner { get; set; }
     
+    [Column("Body")]
+    public string Body { get; set; }
+    
+    [Column("Deleted")]
+    public bool Deleted { get; set; }
+    
     // Navigation properties
     public ICollection<ActivityEntry> ActivityEntries { get; set; }
     public ICollection<EmotionEntry> EmotionEntries { get; set; }
