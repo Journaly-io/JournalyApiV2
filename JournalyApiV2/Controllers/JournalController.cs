@@ -32,8 +32,11 @@ public class JournalController : JournalyControllerBase
                         request.Emotions.Select(x => x.Uuid).ToArray())),
                 Task.Run(() =>
                     _resourceAccessHelper.ValidateActivityAccess(GetUserId(),
-                        request.Activities.Select(x => x.Uuid).ToArray()))
-                );
+                        request.Activities.Select(x => x.Uuid).ToArray())),
+                Task.Run(() =>
+                    _resourceAccessHelper.ValidateJournalEntryAccess(GetUserId(),
+                        request.JournalEntries.Select(x => x.Uuid).ToArray()))
+            );
         }
         catch (IResourceAccessHelper.NoAccessException)
         {

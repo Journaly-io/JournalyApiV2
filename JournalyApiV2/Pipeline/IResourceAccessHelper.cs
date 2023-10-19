@@ -11,4 +11,5 @@ public interface IResourceAccessHelper
     }
 
     Task ValidateActivityAccess(Guid userId, params Guid[] activities);
+    Task ValidateJournalEntryAccess(Guid userId, params Guid[] journalEntries);
 }

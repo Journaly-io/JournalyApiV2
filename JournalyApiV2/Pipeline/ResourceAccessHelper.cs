@@ -49,4 +49,18 @@ public class ResourceAccessHelper : IResourceAccessHelper
         if (dbActivity.Owner == userId) return;
         throw new IResourceAccessHelper.NoAccessException();
     }
+
+    public async Task ValidateJournalEntryAccess(Guid userId, params Guid[] journalEntries)
+    {
+        await Task.WhenAll(journalEntries.Select(x => Task.Run(() => ValidateSingleJournalEntry(x, userId))));
+    }
+
+    private async Task ValidateSingleJournalEntry(Guid entry, Guid userId)
+    {
+        var dbJournalEntry = await _db.JournalEntries.FindAsync(entry);
+        if (dbJournalEntry == null) return; // This is a new entry, so the user inherently has access
+        if (dbJournalEntry.Owner == userId) return;
+        throw new IResourceAccessHelper.NoAccessException();
+    }
+
 }
