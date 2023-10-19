@@ -15,13 +15,13 @@ public class JournalService : IJournalService
         _journalDbService = journalDbService;
     }
 
-    public async Task PatchJournal(PatchJournalRequest request, Guid owner)
+    public async Task PatchJournal(PatchJournalRequest request, Guid owner, Guid deviceId)
     {
         await Task.WhenAll(
-            _journalDbService.SyncCategories(request.Categories, owner),
-            _journalDbService.SyncEmotions(request.Emotions, owner),
-            _journalDbService.SyncActivities(request.Activities, owner),
-            _journalDbService.SyncJournalEntries(request.JournalEntries, owner)
+            _journalDbService.SyncCategories(request.Categories, owner, deviceId),
+            _journalDbService.SyncEmotions(request.Emotions, owner, deviceId),
+            _journalDbService.SyncActivities(request.Activities, owner, deviceId),
+            _journalDbService.SyncJournalEntries(request.JournalEntries, owner, deviceId)
         );
     }
 }

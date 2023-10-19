@@ -4,5 +4,5 @@ namespace JournalyApiV2.Services.BLL;
 
 public interface IJournalService
 {
-    Task PatchJournal(PatchJournalRequest request, Guid owner);
+    Task PatchJournal(PatchJournalRequest request, Guid owner, Guid deviceId);
 }

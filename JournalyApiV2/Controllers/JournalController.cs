@@ -42,7 +42,15 @@ public class JournalController : JournalyControllerBase
         {
             return StatusCode(403);
         }
-        await _journalService.PatchJournal(request, GetUserId());
+
+        try
+        {
+            await _journalService.PatchJournal(request, GetUserId(), GetDeviceId());
+        }
+        catch (ArgumentException ex)
+        {
+            return StatusCode(400, ex.Message);
+        }
         return StatusCode(204);
     }
 }
