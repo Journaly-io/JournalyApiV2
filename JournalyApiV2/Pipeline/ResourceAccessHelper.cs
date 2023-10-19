@@ -18,13 +18,11 @@ public class ResourceAccessHelper : IResourceAccessHelper
 
     private async Task ValidateSingleCategory(Guid category, Guid userId)
     {
-        using (var db = _db.Journaly())
-        {
-            var dbCategory = await db.EmotionCategories.FindAsync(category);
-            if (dbCategory == null) return; // This is a new category, so the user inherently has access
-            if (dbCategory.Owner == userId) return;
-            throw new IResourceAccessHelper.NoAccessException();
-        }
+        await using var db = _db.Journaly();
+        var dbCategory = await db.EmotionCategories.FindAsync(category);
+        if (dbCategory == null) return; // This is a new category, so the user inherently has access
+        if (dbCategory.Owner == userId) return;
+        throw new IResourceAccessHelper.NoAccessException();
     }
 
     public async Task ValidateEmotionAccess(Guid userId, params Guid[] emotions)
@@ -34,13 +32,11 @@ public class ResourceAccessHelper : IResourceAccessHelper
 
     private async Task ValidateSingleEmotion(Guid emotion, Guid userId)
     {
-        using (var db = _db.Journaly())
-        {
-            var dbEmotion = await db.Emotions.FindAsync(emotion);
-            if (dbEmotion == null) return; // This is a new emotion, so the user inherently has access
-            if (dbEmotion.Owner == userId) return;
-            throw new IResourceAccessHelper.NoAccessException();
-        }
+        await using var db = _db.Journaly();
+        var dbEmotion = await db.Emotions.FindAsync(emotion);
+        if (dbEmotion == null) return; // This is a new emotion, so the user inherently has access
+        if (dbEmotion.Owner == userId) return;
+        throw new IResourceAccessHelper.NoAccessException();
     }
 
     public async Task ValidateActivityAccess(Guid userId, params Guid[] activities)
@@ -50,13 +46,11 @@ public class ResourceAccessHelper : IResourceAccessHelper
 
     private async Task ValidateSingleActivity(Guid activity, Guid userId)
     {
-        using (var db = _db.Journaly())
-        {
-            var dbActivity = await db.Activities.FindAsync(activity);
-            if (dbActivity == null) return; // This is a new activity, so the user inherently has access
-            if (dbActivity.Owner == userId) return;
-            throw new IResourceAccessHelper.NoAccessException();
-        }
+        await using var db = _db.Journaly();
+        var dbActivity = await db.Activities.FindAsync(activity);
+        if (dbActivity == null) return; // This is a new activity, so the user inherently has access
+        if (dbActivity.Owner == userId) return;
+        throw new IResourceAccessHelper.NoAccessException();
     }
 
     public async Task ValidateJournalEntryAccess(Guid userId, params Guid[] journalEntries)
@@ -66,13 +60,11 @@ public class ResourceAccessHelper : IResourceAccessHelper
 
     private async Task ValidateSingleJournalEntry(Guid entry, Guid userId)
     {
-        using (var db = _db.Journaly())
-        {
-            var dbJournalEntry = await db.JournalEntries.FindAsync(entry);
-            if (dbJournalEntry == null) return; // This is a new entry, so the user inherently has access
-            if (dbJournalEntry.Owner == userId) return;
-            throw new IResourceAccessHelper.NoAccessException();
-        }
+        await using var db = _db.Journaly();
+        var dbJournalEntry = await db.JournalEntries.FindAsync(entry);
+        if (dbJournalEntry == null) return; // This is a new entry, so the user inherently has access
+        if (dbJournalEntry.Owner == userId) return;
+        throw new IResourceAccessHelper.NoAccessException();
     }
 
 }
