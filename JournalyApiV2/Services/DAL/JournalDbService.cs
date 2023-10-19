@@ -134,7 +134,8 @@ public class JournalDbService : IJournalDbService
         // Handle the easy stuff first - the direct properties of the journal entry
         dbJournalEntry.Body = entry.Body;
         dbJournalEntry.Deleted = entry.Deleted;
-
+        dbJournalEntry.CreatedAt = entry.CreatedAt;
+        
         // Handle emotions
         // Add any missing emotions
         foreach (var emotionEntry in entry.Emotions)
