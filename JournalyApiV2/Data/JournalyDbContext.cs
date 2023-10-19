@@ -11,6 +11,10 @@ public class JournalyDbContext : DbContext
     public DbSet<Emotion> Emotions { get; set; }
     public DbSet<IconType> IconType { get; set; }
     public DbSet<Activity> Activities { get; set; }
+    public DbSet<JournalEntry> JournalEntries { get; set; }
+    public DbSet<ActivityEntry> ActivityEntries { get; set; }
+    public DbSet<JournalEntryCategoryValue> JournalEntryCategoryValues { get; set; }
+    public DbSet<EmotionEntry> EmotionEntries { get; set; }
     
     public JournalyDbContext(IConfiguration config)
     {

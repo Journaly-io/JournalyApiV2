@@ -31,4 +31,5 @@ public class Activity
     
     // Navigation propetries
     public IconType IconType { get; set; }
+    public ICollection<ActivityEntry> ActivityEntries { get; set; }
 }

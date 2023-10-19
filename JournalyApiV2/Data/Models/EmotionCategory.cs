@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JournalyApiV2.Data.Models;
@@ -27,4 +28,5 @@ public class EmotionCategory
     
     // Navigation properties
     public ICollection<Emotion> Emotions { get; }
+    public ICollection<JournalEntryCategoryValue> JournalEntryCategoryValues { get; set; }
 }

@@ -49,4 +49,9 @@ public class ResourceAccessHelper : IResourceAccessHelper
         if (dbActivity.Owner == userId) return;
         throw new IResourceAccessHelper.NoAccessException();
     }
+
+    public async Task ValidateJournalEntryAccess(Guid userId, params Guid[] JournalEntryUuid)
+    {
+        
+    }
 }

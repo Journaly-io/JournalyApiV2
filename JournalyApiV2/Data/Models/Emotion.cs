@@ -36,4 +36,5 @@ public class Emotion
     // Navigation properties
     public EmotionCategory EmotionCategory { get; set; }
     public IconType IconType { get; set; }
+    public ICollection<EmotionEntry> EmotionEntries { get; set; }
 }
