@@ -17,11 +17,13 @@ public class JournalService : IJournalService
 
     public async Task PatchJournal(PatchJournalRequest request, Guid owner, Guid deviceId)
     {
-        await Task.WhenAll(
-            _journalDbService.SyncCategories(request.Categories, owner, deviceId),
-            _journalDbService.SyncEmotions(request.Emotions, owner, deviceId),
-            _journalDbService.SyncActivities(request.Activities, owner, deviceId),
-            _journalDbService.SyncJournalEntries(request.JournalEntries, owner, deviceId)
+
+        await _journalDbService.SyncCategories(request.Categories, owner, deviceId); // Categories must come before emotions and activities due to database constraints
+            await Task.WhenAll(
+                _journalDbService.SyncEmotions(request.Emotions, owner, deviceId),
+                _journalDbService.SyncActivities(request.Activities, owner, deviceId)
+            );
+            await _journalDbService.SyncJournalEntries(request.JournalEntries, owner, deviceId) // Must come last due to database constraints
         );
     }
 }
