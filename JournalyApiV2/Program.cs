@@ -67,6 +67,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IJournalDbService, JournalDbService>();
 builder.Services.AddScoped<IResourceAccessHelper, ResourceAccessHelper>();
+builder.Services.AddScoped<ISyncDbService, SyncDbService>();
 builder.Services.AddDbContext<JournalyDbContext>();
 
 
