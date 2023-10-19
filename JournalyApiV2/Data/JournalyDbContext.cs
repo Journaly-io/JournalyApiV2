@@ -15,6 +15,7 @@ public class JournalyDbContext : DbContext
     public DbSet<ActivityEntry> ActivityEntries { get; set; }
     public DbSet<JournalEntryCategoryValue> JournalEntryCategoryValues { get; set; }
     public DbSet<EmotionEntry> EmotionEntries { get; set; }
+    public DbSet<SyncedRecords> SyncedRecords { get; set; }
     
     public JournalyDbContext(IConfiguration config)
     {

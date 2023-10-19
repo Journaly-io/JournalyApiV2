@@ -275,6 +275,58 @@ namespace JournalyApiV2.Data.Migrations
                     b.ToTable("JournalEntryCategoryValue");
                 });
 
+            modelBuilder.Entity("JournalyApiV2.Data.Models.RecordType", b =>
+                {
+                    b.Property<short>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RecordType");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.SyncedRecords", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DeviceId");
+
+                    b.Property<Guid>("RecordId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("RecordId");
+
+                    b.Property<short>("RecordTypeId")
+                        .HasColumnType("smallint")
+                        .HasColumnName("RecordType");
+
+                    b.Property<DateTime>("Timestamp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("Timestamp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecordTypeId");
+
+                    b.ToTable("SyncedRecords");
+                });
+
             modelBuilder.Entity("JournalyApiV2.Data.Models.Activity", b =>
                 {
                     b.HasOne("JournalyApiV2.Data.Models.IconType", "IconType")
@@ -362,6 +414,17 @@ namespace JournalyApiV2.Data.Migrations
                     b.Navigation("JournalEntry");
                 });
 
+            modelBuilder.Entity("JournalyApiV2.Data.Models.SyncedRecords", b =>
+                {
+                    b.HasOne("JournalyApiV2.Data.Models.RecordType", "RecordType")
+                        .WithMany("SyncedRecords")
+                        .HasForeignKey("RecordTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RecordType");
+                });
+
             modelBuilder.Entity("JournalyApiV2.Data.Models.Activity", b =>
                 {
                     b.Navigation("ActivityEntries");
@@ -393,6 +456,11 @@ namespace JournalyApiV2.Data.Migrations
                     b.Navigation("EmotionEntries");
 
                     b.Navigation("JournalEntryCategoryValues");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.RecordType", b =>
+                {
+                    b.Navigation("SyncedRecords");
                 });
 #pragma warning restore 612, 618
         }
