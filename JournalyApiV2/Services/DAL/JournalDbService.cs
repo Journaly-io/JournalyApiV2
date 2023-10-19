@@ -78,11 +78,7 @@ public class JournalDbService : IJournalDbService
         await _db.SaveChangesAsync();
     }
 
-    private async Task<short> GetIconTypeIdByName(string name)
-    {
-        return (await _db.IconType.SingleAsync(x => x.Name == name)).Id;
-    }
-
+    // Activities
     public async Task SyncActivities(PatchJournalRequest.ActivityPatch[] activities, Guid owner)
     {
         var tasks = activities.Select(activity => Task.Run(() => SyncSingleActivity(activity, owner)));
@@ -109,5 +105,11 @@ public class JournalDbService : IJournalDbService
         if (activity.Icon != null) dbActivity.Icon = activity.Icon;
 
         await _db.SaveChangesAsync();
+    }
+    
+    
+    private async Task<short> GetIconTypeIdByName(string name)
+    {
+        return (await _db.IconType.SingleAsync(x => x.Name == name)).Id;
     }
 }
