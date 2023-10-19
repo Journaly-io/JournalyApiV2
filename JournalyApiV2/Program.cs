@@ -65,6 +65,7 @@ builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IJournalDbService, JournalDbService>();
 builder.Services.AddScoped<IResourceAccessHelper, ResourceAccessHelper>();
 builder.Services.AddScoped<ISyncDbService, SyncDbService>();
+builder.Services.AddScoped<ISyncService, SyncService>();
 //builder.Services.AddDbContext<JournalyDbContext>(); // Do not do this. This API uses concurrency a ton and this will cause race conditions
 builder.Services.AddTransient<IDbFactory, DbFactory>(); // Use this instead 
 
