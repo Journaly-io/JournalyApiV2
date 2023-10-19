@@ -20,20 +20,26 @@ public class AuthService : IAuthService
     public async Task CreateUser(string email, string password, string firstName, string lastName)
     {
         var request = new HttpRequestMessage(HttpMethod.Post,
-            new Uri(_config.GetSection("IdentityStore").GetValue<string>("AdminEndpoint")));
+            new Uri(_config.GetSection("IdentityStore").GetValue<string>("AdminEndpoint") + "users"));
         var body = new KeycloakCreateUserRequest
         {
             Email = email,
             FirstName = firstName,
             LastName = lastName,
             Username = Guid.NewGuid().ToString(),
-            Credentials = new KeycloakCredentials
+            Credentials = new []{new KeycloakCredentials
             {
                 Value = password
-            }
+            }}
         };
         request.Content = new StringContent(JsonSerializer.Serialize(body));
-        await AuthenticatedRequest(request);
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");        
+        var response = await AuthenticatedRequest(request);
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            throw new Exception("Conflict");
+        }
+        response.EnsureSuccessStatusCode();
     }
 
     private async Task<HttpResponseMessage?> AuthenticatedRequest(HttpRequestMessage request)
@@ -125,7 +131,7 @@ public class AuthService : IAuthService
         public string Username { get; set; }
         
         [JsonPropertyName("credentials")]
-        public KeycloakCredentials Credentials { get; set; }
+        public KeycloakCredentials[] Credentials { get; set; }
     }
 
     private class KeycloakCredentials
@@ -137,6 +143,6 @@ public class AuthService : IAuthService
         public string Value { get; set; }
         
         [JsonPropertyName("temporary")]
-        public bool Temporary = false;
+        public bool Temporary { get; set; } = false;
     }
 }

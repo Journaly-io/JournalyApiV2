@@ -21,7 +21,15 @@ public class AuthController : JournalyControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> CreateUser([FromBody] NewUserRequest request)
     {
-        await _authService.CreateUser(request.Email, request.Password, request.FirstName, request.LastName);
+        try
+        {
+            await _authService.CreateUser(request.Email, request.Password, request.FirstName, request.LastName);
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message == "Conflict") return StatusCode(409);
+            throw;
+        }
         return StatusCode(204);
     }
 }
