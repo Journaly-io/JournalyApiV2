@@ -12,7 +12,10 @@ builder.Configuration.AddJsonFile("appsettings.json");
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson(options => // System.Text.Json will not deserialize times into TimeOnly correctly for reaason
+{
+    options.SerializerSettings.Converters.Add(new TimeOnlyConverter()); // Neither will newtonsoft appearantly
+});
 
 // Import JWT certificate
 var cert = new X509Certificate2(
@@ -68,6 +71,7 @@ builder.Services.AddScoped<ISyncDbService, SyncDbService>();
 builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMedService, MedService>();
+builder.Services.AddScoped<IMedDbService, MedDbService>();
 //builder.Services.AddDbContext<JournalyDbContext>(); // Do not do this. This API uses concurrency a ton and this will cause race conditions
 builder.Services.AddTransient<IDbFactory, DbFactory>(); // Use this instead 
 

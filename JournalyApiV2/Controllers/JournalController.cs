@@ -23,6 +23,12 @@ public class JournalController : JournalyControllerBase
     [HttpPatch]
     public async Task<IActionResult> PatchJournal([FromBody] PatchJournalRequest request)
     {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors);
+            return BadRequest(errors);
+        }
+        
         try
         {
             await Task.WhenAll(

@@ -20,6 +20,11 @@ public class MedController : JournalyControllerBase
     [HttpPatch]
     public async Task<IActionResult> PatchMeds([FromBody] PatchMedsRequest request)
     {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors);
+            return BadRequest(errors);
+        }
         await _medService.PatchMeds(request, GetUserId(), GetDeviceId());
         return StatusCode(204);
     }

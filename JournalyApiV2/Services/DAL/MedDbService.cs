@@ -31,7 +31,8 @@ public class MedDbService : IMedDbService
             dbMed = new Data.Models.Medication
             {
                 Uuid = patch.Uuid,
-                Owner = owner
+                Owner = owner,
+                MedSchedules = new List<MedSchedule>()
             };
             await db.Medications.AddAsync(dbMed);
         }
