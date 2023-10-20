@@ -12,6 +12,7 @@ public class PatchMedsRequest
         public string? Notes { get; set; }
         public short? Unit { get; set; }
         public short? DefaultDose { get; set; }
+        public bool? Deleted { get; set; }
         public SchedulePatch[] Schedules { get; set; }
         
     }
