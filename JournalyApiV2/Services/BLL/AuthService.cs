@@ -76,7 +76,7 @@ public class AuthService : IAuthService
         var client = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Post,
             new Uri(_config.GetSection("IdentityStore").GetValue<string>("Authority"))
-                + "/protocol/openid-connect/token"); // TODO: pull from .well_known
+                + "protocol/openid-connect/token"); // TODO: pull from .well_known
         var collection = new List<KeyValuePair<string, string>>();
         collection.Add(new("grant_type", "client_credentials"));
         collection.Add(new("client_id", _config.GetSection("IdentityStore").GetValue<string>("ClientId")));
