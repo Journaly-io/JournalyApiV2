@@ -26,6 +26,6 @@ public class PatchMedsRequest
     {
         public TimeOnly Time { get; set; }
         public bool EveryOtherDay { get; set; }
-        public int[] Days { get; set; } = Array.Empty<int>();
+        public short[] Days { get; set; } = Array.Empty<short>();
     }
 }
