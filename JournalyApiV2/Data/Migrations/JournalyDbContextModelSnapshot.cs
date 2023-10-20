@@ -400,6 +400,10 @@ namespace JournalyApiV2.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("Notes");
 
+                    b.Property<Guid>("Owner")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Owner");
+
                     b.Property<short>("Unit")
                         .HasColumnType("smallint")
                         .HasColumnName("Unit");

@@ -67,4 +67,18 @@ public class ResourceAccessHelper : IResourceAccessHelper
         throw new IResourceAccessHelper.NoAccessException();
     }
 
+    public async Task ValidateMedAccess(Guid userId, params Guid[] meds)
+    {
+        await Task.WhenAll(meds.Select(x => Task.Run(() => ValidateSingleMed(x, userId))));
+    }
+
+    private async Task ValidateSingleMed(Guid med, Guid userId)
+    {
+        await using var db = _db.Journaly();
+        var dbMed = await db.Medications.FindAsync(med);
+        if (dbMed == null) return; // This is a new med, so the user inherently has access
+        if (dbMed.Owner == userId) return;
+        throw new IResourceAccessHelper.NoAccessException();
+    }
+
 }

@@ -1,12 +1,14 @@
 ﻿using JournalyApiV2.Models.Requests;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JournalyApiV2.Controllers;
 
 [Controller]
 [Route("/journal")]
+[Authorize]
 public class JournalController : JournalyControllerBase
 {
     private readonly IJournalService _journalService;

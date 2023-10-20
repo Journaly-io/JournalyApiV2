@@ -36,6 +36,9 @@ public class Medication
     [Column("Deleted")]
     public bool Deleted { get; set; }
     
+    [Column("Owner")]
+    public Guid Owner { get; set; }
+    
     // Navigation properties
     public MedUnit MedUnit { get; set; }
     public ICollection<MedSchedule> MedSchedules { get; set; }
