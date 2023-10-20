@@ -43,6 +43,9 @@ public class MedDbService : IMedDbService
         if (patch.Notes != null) dbMed.Notes = patch.Notes;
         if (patch.Unit != null) dbMed.Unit = patch.Unit.Value;
         if (patch.DefaultDose != null) dbMed.DefaultDose = patch.DefaultDose.Value;
+        if (patch.From != null) dbMed.FromDate = patch.From.Value;
+        if (patch.Until != null) dbMed.UntilDate = patch.Until.Value;
+        if (patch.Forever != null) dbMed.Forever = patch.Forever.Value;
 
         var accountedFor = new List<int>();
         /* Now the hard part - schedules

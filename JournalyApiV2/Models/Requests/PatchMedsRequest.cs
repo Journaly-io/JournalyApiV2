@@ -14,7 +14,9 @@ public class PatchMedsRequest
         public short? DefaultDose { get; set; }
         public bool? Deleted { get; set; }
         public SchedulePatch[] Schedules { get; set; }
-        
+        public DateOnly? From { get; set; }
+        public DateOnly? Until { get; set; }
+        public bool? Forever { get; set; }
     }
 
     public class MedEntryPatch
