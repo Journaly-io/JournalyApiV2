@@ -16,6 +16,11 @@ public class JournalyDbContext : DbContext
     public DbSet<JournalEntryCategoryValue> JournalEntryCategoryValues { get; set; }
     public DbSet<EmotionEntry> EmotionEntries { get; set; }
     public DbSet<SyncedRecords> SyncedRecords { get; set; }
+    public DbSet<MedUnit> MedUnits { get; set; }
+    public DbSet<Medication> Medications { get; set; }
+    public DbSet<MedSchedule> MedSchedules { get; set; }
+    public DbSet<MedScheduleDays> MedScheduleDays { get; set; }
+    public DbSet<Day> Days { get; set; }
     
     public JournalyDbContext(IConfiguration config)
     {

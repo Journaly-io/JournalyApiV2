@@ -88,6 +88,25 @@ namespace JournalyApiV2.Data.Migrations
                     b.ToTable("ActivityEntry");
                 });
 
+            modelBuilder.Entity("JournalyApiV2.Data.Models.Day", b =>
+                {
+                    b.Property<short>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Day");
+                });
+
             modelBuilder.Entity("JournalyApiV2.Data.Models.Emotion", b =>
                 {
                     b.Property<Guid>("Uuid")
@@ -275,6 +294,127 @@ namespace JournalyApiV2.Data.Migrations
                     b.ToTable("JournalEntryCategoryValue");
                 });
 
+            modelBuilder.Entity("JournalyApiV2.Data.Models.MedSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("EveryOtherDay")
+                        .HasColumnType("boolean")
+                        .HasColumnName("EveryOtherDay");
+
+                    b.Property<Guid>("MedicationUuid")
+                        .HasColumnType("uuid")
+                        .HasColumnName("MedicationUuid");
+
+                    b.Property<TimeOnly>("Time")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("Time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MedicationUuid");
+
+                    b.ToTable("MedSchedule");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.MedScheduleDays", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<short>("DayId")
+                        .HasColumnType("smallint")
+                        .HasColumnName("Day");
+
+                    b.Property<int>("MedScheduleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("MedScheduleId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DayId");
+
+                    b.HasIndex("MedScheduleId");
+
+                    b.ToTable("MedScheduleDays");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.MedUnit", b =>
+                {
+                    b.Property<short>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MedUnit");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.Medication", b =>
+                {
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("Uuid");
+
+                    b.Property<short>("DefaultDose")
+                        .HasColumnType("smallint")
+                        .HasColumnName("DefaultDose");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("Deleted");
+
+                    b.Property<bool>("Forever")
+                        .HasColumnType("boolean")
+                        .HasColumnName("Forever");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date")
+                        .HasColumnName("From");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Notes");
+
+                    b.Property<short>("Unit")
+                        .HasColumnType("smallint")
+                        .HasColumnName("Unit");
+
+                    b.Property<DateOnly>("UntilDate")
+                        .HasColumnType("date")
+                        .HasColumnName("Until");
+
+                    b.HasKey("Uuid");
+
+                    b.HasIndex("Unit");
+
+                    b.ToTable("Medication");
+                });
+
             modelBuilder.Entity("JournalyApiV2.Data.Models.RecordType", b =>
                 {
                     b.Property<short>("Id")
@@ -414,6 +554,47 @@ namespace JournalyApiV2.Data.Migrations
                     b.Navigation("JournalEntry");
                 });
 
+            modelBuilder.Entity("JournalyApiV2.Data.Models.MedSchedule", b =>
+                {
+                    b.HasOne("JournalyApiV2.Data.Models.Medication", "Medication")
+                        .WithMany("MedSchedules")
+                        .HasForeignKey("MedicationUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Medication");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.MedScheduleDays", b =>
+                {
+                    b.HasOne("JournalyApiV2.Data.Models.Day", "Day")
+                        .WithMany("MedScheduleDays")
+                        .HasForeignKey("DayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JournalyApiV2.Data.Models.MedSchedule", "MedSchedule")
+                        .WithMany("Days")
+                        .HasForeignKey("MedScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Day");
+
+                    b.Navigation("MedSchedule");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.Medication", b =>
+                {
+                    b.HasOne("JournalyApiV2.Data.Models.MedUnit", "MedUnit")
+                        .WithMany("Medications")
+                        .HasForeignKey("Unit")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedUnit");
+                });
+
             modelBuilder.Entity("JournalyApiV2.Data.Models.SyncedRecords", b =>
                 {
                     b.HasOne("JournalyApiV2.Data.Models.RecordType", "RecordType")
@@ -428,6 +609,11 @@ namespace JournalyApiV2.Data.Migrations
             modelBuilder.Entity("JournalyApiV2.Data.Models.Activity", b =>
                 {
                     b.Navigation("ActivityEntries");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.Day", b =>
+                {
+                    b.Navigation("MedScheduleDays");
                 });
 
             modelBuilder.Entity("JournalyApiV2.Data.Models.Emotion", b =>
@@ -456,6 +642,21 @@ namespace JournalyApiV2.Data.Migrations
                     b.Navigation("EmotionEntries");
 
                     b.Navigation("JournalEntryCategoryValues");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.MedSchedule", b =>
+                {
+                    b.Navigation("Days");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.MedUnit", b =>
+                {
+                    b.Navigation("Medications");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.Medication", b =>
+                {
+                    b.Navigation("MedSchedules");
                 });
 
             modelBuilder.Entity("JournalyApiV2.Data.Models.RecordType", b =>
