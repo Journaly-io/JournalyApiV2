@@ -1,5 +1,6 @@
 ﻿using JournalyApiV2.Data;
 using JournalyApiV2.Data.Models;
+using JournalyApiV2.Models;
 using JournalyApiV2.Models.Requests;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,10 +9,12 @@ namespace JournalyApiV2.Services.DAL;
 public class MedDbService : IMedDbService
 {
     private readonly IDbFactory _db;
+    private readonly ISyncDbService _syncDbService;
 
-    public MedDbService(IDbFactory db)
+    public MedDbService(IDbFactory db, ISyncDbService syncDbService)
     {
         _db = db;
+        _syncDbService = syncDbService;
     }
 
     public async Task SyncMeds(PatchMedsRequest.MedPatch[] patches, Guid owner, Guid deviceId)
@@ -19,6 +22,14 @@ public class MedDbService : IMedDbService
         var tasks = patches.Select(emotionCategory => Task.Run(() => SyncSingleMed(emotionCategory, owner)))
             .ToArray();
         await Task.WhenAll(tasks);
+        // Since this device uploaded these records we can mark them synced for that device
+        var recordSyncs = patches.Select(x => new RecordSync
+        {
+            DeviceId = deviceId,
+            RecordId = x.Uuid,
+            RecordType = Data.Enums.RecordType.Med
+        });
+        await _syncDbService.MarkSynced(recordSyncs.ToArray());
     }
 
     private async Task SyncSingleMed(PatchMedsRequest.MedPatch patch, Guid owner)
