@@ -19,8 +19,10 @@ public class SyncDbService : ISyncDbService
     {
         await using var db = _db.Journaly();
 
-        var existingRecords = db.SyncedRecords.Where(x =>
-            recordSyncs.Any(y => y.RecordId == x.RecordId && y.RecordType == x.RecordType));
+        var existingRecords =
+            await db.SyncedRecords.Where(x => recordSyncs.Select(y => y.RecordId).Contains(x.RecordId)).ToListAsync();
+        
+        existingRecords.ForEach(x => x.IsVoid = true); // Void existing records
 
         await db.SyncedRecords.AddRangeAsync(recordSyncs.Select(x => new SyncedRecords
         {
@@ -38,7 +40,7 @@ public class SyncDbService : ISyncDbService
         var unsyncedJournalEntries =
             from je in db.JournalEntries
             let synced = db.SyncedRecords.Any(sr =>
-                sr.RecordId == je.Uuid && sr.DeviceId == deviceGuid && sr.RecordType == RecordType.JournalEntry)
+                sr.RecordId == je.Uuid && sr.DeviceId == deviceGuid && sr.RecordType == RecordType.JournalEntry && !sr.IsVoid)
             where je.Owner == userGuid && !synced
             select new Models.JournalEntry
             {
@@ -81,7 +83,7 @@ public class SyncDbService : ISyncDbService
             from em in db.Emotions
             join iconType in db.IconType on em.IconTypeId equals iconType.Id
             let synced = db.SyncedRecords.Any(sr =>
-                sr.RecordId == em.Uuid && sr.DeviceId == deviceGuid && sr.RecordType == RecordType.Emotion)
+                sr.RecordId == em.Uuid && sr.DeviceId == deviceGuid && sr.RecordType == RecordType.Emotion && !sr.IsVoid)
             where em.Owner == userGuid && !synced
             select new Models.Emotion
             {
@@ -102,7 +104,7 @@ public class SyncDbService : ISyncDbService
             from ac in db.Activities
             join iconType in db.IconType on ac.IconTypeId equals iconType.Id
             let synced = db.SyncedRecords.Any(sr =>
-                sr.RecordId == ac.Uuid && sr.DeviceId == deviceGuid && sr.RecordType == RecordType.Activity)
+                sr.RecordId == ac.Uuid && sr.DeviceId == deviceGuid && sr.RecordType == RecordType.Activity && !sr.IsVoid)
             where ac.Owner == userGuid && !synced
             select new Models.Activity
             {
@@ -122,7 +124,7 @@ public class SyncDbService : ISyncDbService
         var unsyncedCategories =
             from ec in db.EmotionCategories
             let synced = db.SyncedRecords.Any(sr =>
-                sr.RecordId == ec.Uuid && sr.DeviceId == deviceGuid && sr.RecordType == RecordType.Category)
+                sr.RecordId == ec.Uuid && sr.DeviceId == deviceGuid && sr.RecordType == RecordType.Category && !sr.IsVoid)
             where ec.Owner == userGuid && !synced
             select new Models.EmotionCategory
             {
