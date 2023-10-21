@@ -16,15 +16,15 @@ public class SyncedRecords
     
     [Column("RecordId")]
     public Guid RecordId { get; set; }
+
+    [Column("IsVoid")]
+    public bool IsVoid { get; set; }
     
-    [Column("RecordType")]
+    [Column("RecordTypeId")]
     [ForeignKey("RecordType")]
-    public short RecordTypeId { get; set; }
+    public Enums.RecordType RecordType { get; set; }
     
     [Column("Timestamp")]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public DateTime Timestamp { get; set; }
-    
-    // Navigation properties
-    public RecordType RecordType { get; set; }
 }
