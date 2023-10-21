@@ -20,7 +20,7 @@ public class SyncDbService : ISyncDbService
         await using var db = _db.Journaly();
 
         var existingRecords =
-            await db.SyncedRecords.Where(x => recordSyncs.Select(y => y.RecordId).Contains(x.RecordId)).ToListAsync();
+            await db.SyncedRecords.Where(x => recordSyncs.Select(y => y.RecordId).Contains(x.RecordId) && !x.IsVoid).ToListAsync();
         
         existingRecords.ForEach(x => x.IsVoid = true); // Void existing records
 
@@ -92,7 +92,8 @@ public class SyncDbService : ISyncDbService
                 IconType = iconType.Name,
                 Name = em.Name,
                 Order = em.Order,
-                UUID = em.Uuid
+                UUID = em.Uuid,
+                Deleted = em.Deleted
             };
         return await unsyncedEmotions.ToArrayAsync();
     }

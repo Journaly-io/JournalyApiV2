@@ -8,4 +8,5 @@ public class Emotion
     public Guid CategoryId { get; set; }
     public short Order { get; set; }
     public string? IconType { get; set; }
+    public bool Deleted { get; set; }
 }
