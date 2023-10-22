@@ -130,7 +130,8 @@ public class MedDbService : IMedDbService
             dbSchedule = new MedSchedule
             {
                 Uuid = patch.Uuid,
-                MedicationUuid = patch.MedicationUuid.Value
+                MedicationUuid = patch.MedicationUuid.Value,
+                Owner = owner
             };
             await db.MedSchedules.AddAsync(dbSchedule);
         }

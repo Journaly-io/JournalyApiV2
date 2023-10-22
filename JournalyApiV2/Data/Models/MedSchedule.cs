@@ -22,6 +22,9 @@ public class MedSchedule
     [ForeignKey("Medication")]
     public Guid MedicationUuid { get; set; }
     
+    [Column("Owner")]
+    public Guid Owner { get; set; }
+    
     // Navigation properties
     public Medication Medication { get; set; }
     public ICollection<MedScheduleDays> Days { get; set; }

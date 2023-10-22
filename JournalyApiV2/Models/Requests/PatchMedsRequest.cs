@@ -6,7 +6,7 @@ public class PatchMedsRequest
 {
     public MedPatch[] Meds { get; set; } = Array.Empty<MedPatch>();
     public MedInstancePatch[] MedInstances { get; set; } = Array.Empty<MedInstancePatch>();
-    public SchedulePatch[] Schedules { get; set; }
+    public SchedulePatch[] Schedules { get; set; } = Array.Empty<SchedulePatch>();
 
     public class MedPatch
     {
