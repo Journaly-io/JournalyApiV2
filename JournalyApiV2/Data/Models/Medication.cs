@@ -42,4 +42,5 @@ public class Medication
     // Navigation properties
     public MedUnit MedUnit { get; set; }
     public ICollection<MedSchedule> MedSchedules { get; set; }
+    public ICollection<MedicationInstance> Instances { get; set; }
 }
