@@ -5,4 +5,5 @@ namespace JournalyApiV2.Services.DAL;
 public interface IMedDbService
 {
     Task SyncMeds(PatchMedsRequest.MedPatch[] patches, Guid owner, Guid deviceId);
+    Task SyncMedInstances(PatchMedsRequest.MedInstancePatch[] patches, Guid owner, Guid deviceId);
 }

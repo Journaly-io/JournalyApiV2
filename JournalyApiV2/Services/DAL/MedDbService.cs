@@ -19,7 +19,7 @@ public class MedDbService : IMedDbService
 
     public async Task SyncMeds(PatchMedsRequest.MedPatch[] patches, Guid owner, Guid deviceId)
     {
-        var tasks = patches.Select(emotionCategory => Task.Run(() => SyncSingleMed(emotionCategory, owner)))
+        var tasks = patches.Select(medPatch => Task.Run(() => SyncSingleMed(medPatch, owner)))
             .ToArray();
         await Task.WhenAll(tasks);
         // Since this device uploaded these records we can mark them synced for that device
@@ -102,14 +102,44 @@ public class MedDbService : IMedDbService
         await transaction.CommitAsync();
     }
 
-    public async Task SyncMedInstances(PatchMedsRequest.MedInstancePatch[] patches)
+    public async Task SyncMedInstances(PatchMedsRequest.MedInstancePatch[] patches, Guid owner, Guid deviceId)
     {
-
+        var tasks = patches.Select(medInstancePatch => Task.Run(() => SyncSingleMedInstance(medInstancePatch, owner)))
+            .ToArray();
+        await Task.WhenAll(tasks);
+        // Since this device uploaded these records we can mark them synced for that device
+        var recordSyncs = patches.Select(x => new RecordSync
+        {
+            DeviceId = deviceId,
+            RecordId = x.Uuid,
+            RecordType = Data.Enums.RecordType.MedInstance
+        });
+        await _syncDbService.MarkSynced(recordSyncs.ToArray());
     }
 
-    public async Task SyncSingleMedInstance(PatchMedsRequest.MedInstancePatch patch)
+    public async Task SyncSingleMedInstance(PatchMedsRequest.MedInstancePatch patch, Guid owner)
     {
+        await using var db = _db.Journaly();
+        var dbMedInstance = await db.MedicationInstances.FindAsync(patch.Uuid);
+        if (dbMedInstance == null)
+        {
+            if (patch.MedicationUuid == null)
+                throw new ArgumentException("Medication UUID is required to create a new instance");
+            dbMedInstance = new Data.Models.MedicationInstance
+            {
+                Uuid = patch.Uuid,
+                Owner = owner,
+                MedicationUuid = patch.MedicationUuid.Value
+            };
+            await db.MedicationInstances.AddAsync(dbMedInstance);
+        }
+
+        if (patch.Dose != null) dbMedInstance.Dose = patch.Dose.Value;
+        dbMedInstance.ScheduledTime = patch.ScheduledTime;
+        dbMedInstance.ActualTime = patch.ActualTime;
+        if (patch.Status != null) dbMedInstance.Status = patch.Status.Value;
         
+        await db.SaveChangesAsync();
     }
 
 }

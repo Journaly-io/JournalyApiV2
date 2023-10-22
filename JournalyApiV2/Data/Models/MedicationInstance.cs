@@ -31,7 +31,13 @@ public class MedicationInstance
     
     [Column("Status")]
     [ForeignKey("MedStatus")]
-    public MedStatus Status { get; set; }
+    public Enums.MedStatus Status { get; set; }
+
+    [Column("Deleted")] 
+    public bool Deleted { get; set; }
+    
+    [Column("Owner")]
+    public Guid Owner { get; set; }
     
     // Navigation properties
     public Medication Medication { get; set; }

@@ -24,11 +24,11 @@ public class PatchMedsRequest
     public class MedInstancePatch
     {
         public Guid Uuid { get; set; }
-        public Guid MedicationUuid { get; set; }
+        public Guid? MedicationUuid { get; set; }
         public short? Dose { get; set; }
         public DateTime? ScheduledTime { get; set; } // This can actually be set to null so it must be specified every time
         public DateTime? ActualTime { get; set; } // This can actually be set to null so it must be specified every time
-        public MedStatus Status { get; set; }
+        public MedStatus? Status { get; set; }
     }
 
     public class SchedulePatch
