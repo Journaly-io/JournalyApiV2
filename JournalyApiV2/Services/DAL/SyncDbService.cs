@@ -179,6 +179,7 @@ public class SyncDbService : ISyncDbService
             {
                 Uuid = sc.Uuid,
                 Time = sc.Time,
+                MedicationUuid = sc.MedicationUuid,
                 EveryOtherDay = sc.EveryOtherDay,
                 Days = sc.Days.Select(x => (DayOfWeek)x.DayId).ToArray()
             };
