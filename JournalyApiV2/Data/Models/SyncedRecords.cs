@@ -22,9 +22,12 @@ public class SyncedRecords
     
     [Column("RecordTypeId")]
     [ForeignKey("RecordType")]
-    public Enums.RecordType RecordType { get; set; }
+    public short RecordTypeId { get; set; }
     
     [Column("Timestamp")]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public DateTime Timestamp { get; set; }
+    
+    // Navigation properties
+    public RecordType RecordType { get; set; }
 }
