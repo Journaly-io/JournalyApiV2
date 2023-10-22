@@ -121,6 +121,7 @@ public class MedDbService : IMedDbService
     private async Task SyncSingleSchedule(PatchMedsRequest.SchedulePatch patch, Guid owner)
     {
         await using var db = _db.Journaly();
+        var transaction = db.Database.BeginTransaction();
         var dbSchedule = await db.MedSchedules.FindAsync(patch.Uuid);
         
         if (dbSchedule == null)
@@ -138,6 +139,7 @@ public class MedDbService : IMedDbService
 
         if (patch.Time != null) dbSchedule.Time = patch.Time.Value;
         if (patch.EveryOtherDay != null) dbSchedule.EveryOtherDay = patch.EveryOtherDay.Value;
+        await db.SaveChangesAsync(); // save now so we dont violate the constraint when we add days
         if (patch.Days != null)
         {
             var dbDays = await db.MedScheduleDays.Where(x => x.MedScheduleUuid == patch.Uuid).ToListAsync();
@@ -154,6 +156,7 @@ public class MedDbService : IMedDbService
         }
 
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
 
 }
