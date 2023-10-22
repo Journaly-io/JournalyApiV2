@@ -164,7 +164,9 @@ public class SyncDbService : ISyncDbService
                             {
                                 Time = schedule.Time,
                                 EveryOtherDay = schedule.EveryOtherDay,
-                                Days = Array.Empty<DayOfWeek>()
+                                Days = (from dayOfWeek in db.MedScheduleDays
+                                        where dayOfWeek.MedScheduleId == schedule.Id
+                                            select dayOfWeek.DayId).Select(x => (DayOfWeek)x).ToArray()
                             }).ToArray(),
                 Unit = (MedUnit)me.Unit,
                 Until = me.UntilDate,

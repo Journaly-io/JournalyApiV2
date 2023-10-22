@@ -31,7 +31,7 @@ public class SyncService : ISyncService
 
         var recordSyncs = medSyncs.ToArray();
 
-        //await _syncDbService.MarkSynced(recordSyncs);
+        await _syncDbService.MarkSynced(recordSyncs);
 
         return new SyncMedResponse
         {
