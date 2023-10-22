@@ -7,5 +7,6 @@ public enum RecordType
     Emotion = 3,
     Category = 4,
     Med = 5,
-    MedInstance = 6
+    MedInstance = 6,
+    Schedule = 7
 }

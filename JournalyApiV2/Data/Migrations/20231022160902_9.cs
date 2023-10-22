@@ -60,7 +60,9 @@ namespace JournalyApiV2.Data.Migrations
                     ScheduledTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ActualTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     MedStatus = table.Column<short>(type: "smallint", nullable: false),
-                    ScheduleId = table.Column<int>(type: "integer", nullable: false)
+                    ScheduleId = table.Column<int>(type: "integer", nullable: false),
+                    Deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    Owner = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {

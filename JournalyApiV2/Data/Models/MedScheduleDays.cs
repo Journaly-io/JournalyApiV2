@@ -11,9 +11,9 @@ public class MedScheduleDays
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Column("MedScheduleId")]
+    [Column("MedScheduleUuid")]
     [ForeignKey("MedSchedule")]
-    public int MedScheduleId { get; set; }
+    public Guid MedScheduleUuid { get; set; }
     
     [Column("Day")]
     [ForeignKey("Day")]

@@ -29,7 +29,7 @@ public class MedicationInstance
     [Column("ActualTime")]
     public DateTime? ActualTime { get; set; } // Can be null if scheduled but not taken yet
     
-    [Column("Status")]
+    [Column("MedStatus")]
     [ForeignKey("MedStatus")]
     public Enums.MedStatus Status { get; set; }
 

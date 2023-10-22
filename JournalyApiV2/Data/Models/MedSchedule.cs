@@ -8,9 +8,9 @@ namespace JournalyApiV2.Data.Models;
 public class MedSchedule
 {
     [Key]
-    [Column("Id")]
+    [Column("Uuid")]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public Guid Uuid { get; set; }
     
     [Column("Time")]
     public TimeOnly Time { get; set; }
