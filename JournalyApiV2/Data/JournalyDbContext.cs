@@ -1,5 +1,7 @@
 ﻿using JournalyApiV2.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using MedStatus = JournalyApiV2.Data.Enums.MedStatus;
+using RecordType = JournalyApiV2.Data.Enums.RecordType;
 
 namespace JournalyApiV2.Data;
 
@@ -21,6 +23,9 @@ public class JournalyDbContext : DbContext
     public DbSet<MedSchedule> MedSchedules { get; set; }
     public DbSet<MedScheduleDays> MedScheduleDays { get; set; }
     public DbSet<Day> Days { get; set; }
+    public DbSet<Data.Models.RecordType> RecordTypes { get; set; }
+    public DbSet<MedicationInstance> MedicationInstances { get; set; }
+    public DbSet<Data.Models.MedStatus> MedStatuses { get; set; }
     
     public JournalyDbContext(IConfiguration config)
     {

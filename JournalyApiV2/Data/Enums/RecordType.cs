@@ -6,5 +6,6 @@ public enum RecordType
     JournalEntry = 2,
     Emotion = 3,
     Category = 4,
-    Med = 5
+    Med = 5,
+    MedInstance = 6
 }

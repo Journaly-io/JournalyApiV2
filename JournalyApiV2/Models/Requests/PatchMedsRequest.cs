@@ -1,9 +1,11 @@
-﻿namespace JournalyApiV2.Models.Requests;
+﻿using JournalyApiV2.Data.Enums;
+
+namespace JournalyApiV2.Models.Requests;
 
 public class PatchMedsRequest
 {
     public MedPatch[] Meds { get; set; } = Array.Empty<MedPatch>();
-    public MedEntryPatch[] MedEntries { get; set; } = Array.Empty<MedEntryPatch>();
+    public MedInstancePatch[] MedInstances { get; set; } = Array.Empty<MedInstancePatch>();
 
     public class MedPatch
     {
@@ -19,9 +21,14 @@ public class PatchMedsRequest
         public bool? Forever { get; set; }
     }
 
-    public class MedEntryPatch
+    public class MedInstancePatch
     {
-        
+        public Guid Uuid { get; set; }
+        public Guid MedicationUuid { get; set; }
+        public short? Dose { get; set; }
+        public DateTime? ScheduledTime { get; set; } // This can actually be set to null so it must be specified every time
+        public DateTime? ActualTime { get; set; } // This can actually be set to null so it must be specified every time
+        public MedStatus Status { get; set; }
     }
 
     public class SchedulePatch

@@ -36,7 +36,8 @@ public class MedDbService : IMedDbService
     {
         await using var db = _db.Journaly();
         var transaction = await db.Database.BeginTransactionAsync();
-        var dbMed = await db.Medications.Include(x => x.MedSchedules).ThenInclude(x => x.Days).SingleOrDefaultAsync(x => x.Uuid == patch.Uuid);
+        var dbMed = await db.Medications.Include(x => x.MedSchedules).ThenInclude(x => x.Days)
+            .SingleOrDefaultAsync(x => x.Uuid == patch.Uuid);
         if (dbMed == null)
         {
             dbMed = new Data.Models.Medication
@@ -75,6 +76,7 @@ public class MedDbService : IMedDbService
                 accountedFor.Add(existing.Id);
                 continue;
             }
+
             // This schedule is new or changed - Add a new one
             var result = await db.MedSchedules.AddAsync(new MedSchedule
             {
@@ -91,6 +93,7 @@ public class MedDbService : IMedDbService
             }));
             await db.SaveChangesAsync();
         }
+
         // Finally, remove any schedules that are not accounted for
         var toRemove = dbMed.MedSchedules.Where(x => !accountedFor.Contains(x.Id)).ToArray();
         db.MedSchedules.RemoveRange(toRemove);
@@ -98,4 +101,15 @@ public class MedDbService : IMedDbService
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
     }
+
+    public async Task SyncMedInstances(PatchMedsRequest.MedInstancePatch[] patches)
+    {
+
+    }
+
+    public async Task SyncSingleMedInstance(PatchMedsRequest.MedInstancePatch patch)
+    {
+        
+    }
+
 }
