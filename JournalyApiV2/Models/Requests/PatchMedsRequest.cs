@@ -36,8 +36,9 @@ public class PatchMedsRequest
     public class SchedulePatch
     {
         public Guid Uuid { get; set; }
-        public TimeOnly Time { get; set; }
-        public bool EveryOtherDay { get; set; }
-        public short[] Days { get; set; } = Array.Empty<short>();
+        public Guid? MedicationUuid { get; set; }
+        public TimeOnly? Time { get; set; }
+        public bool? EveryOtherDay { get; set; }
+        public short[]? Days { get; set; }
     }
 }

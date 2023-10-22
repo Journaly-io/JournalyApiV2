@@ -15,6 +15,7 @@ public class MedService : IMedService
     public async Task PatchMeds(PatchMedsRequest request, Guid owner, Guid deviceId)
     {
         await _medDbService.SyncMeds(request.Meds, owner, deviceId);
+        await _medDbService.SyncSchedules(request.Schedules, owner, deviceId);
         await _medDbService.SyncMedInstances(request.MedInstances, owner, deviceId);
     }
 }

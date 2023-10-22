@@ -118,17 +118,41 @@ public class MedDbService : IMedDbService
         });
         await _syncDbService.MarkSynced(recordSyncs.ToArray());    }
 
-    public async Task SyncSingleSchedule(PatchMedsRequest.SchedulePatch patch, Guid owner)
+    private async Task SyncSingleSchedule(PatchMedsRequest.SchedulePatch patch, Guid owner)
     {
         await using var db = _db.Journaly();
         var dbSchedule = await db.MedSchedules.FindAsync(patch.Uuid);
+        
         if (dbSchedule == null)
         {
+            if (patch.MedicationUuid == null)
+                throw new ArgumentException("MedicationUuid is required to create a new scnedule");
             dbSchedule = new MedSchedule
             {
-
+                Uuid = patch.Uuid,
+                MedicationUuid = patch.MedicationUuid.Value
             };
+            await db.MedSchedules.AddAsync(dbSchedule);
         }
+
+        if (patch.Time != null) dbSchedule.Time = patch.Time.Value;
+        if (patch.EveryOtherDay != null) dbSchedule.EveryOtherDay = patch.EveryOtherDay.Value;
+        if (patch.Days != null)
+        {
+            var dbDays = await db.MedScheduleDays.Where(x => x.MedScheduleUuid == patch.Uuid).ToListAsync();
+            // Add missing days
+            var missing = patch.Days.Where(x => dbDays.All(y => y.DayId != x)).ToList();
+            await db.MedScheduleDays.AddRangeAsync(missing.Select(x => new MedScheduleDays
+            {
+                DayId = x,
+                MedScheduleUuid = patch.Uuid
+            }));
+            // Remove extra days
+            var extra = dbDays.Where(x => patch.Days.All(y => y != x.DayId));
+            db.MedScheduleDays.RemoveRange(extra);
+        }
+
+        await db.SaveChangesAsync();
     }
 
 }
