@@ -4,6 +4,7 @@ using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
 using Microsoft.EntityFrameworkCore;
 using Medication = JournalyApiV2.Data.Models.Medication;
+using MedUnit = JournalyApiV2.Data.Enums.MedUnit;
 using RecordType = JournalyApiV2.Data.Enums.RecordType;
 
 namespace JournalyApiV2.Services.DAL;
@@ -157,7 +158,18 @@ public class SyncDbService : ISyncDbService
                 From = me.FromDate,
                 Name = me.Name,
                 Notes = me.Notes,
-                Schedules = Array.Empty<Schedule>() // TODO: this
+                Schedules = (from schedule in db.MedSchedules
+                        where schedule.MedicationUuid == me.Uuid
+                            select new Models.Schedule
+                            {
+                                Time = schedule.Time,
+                                EveryOtherDay = schedule.EveryOtherDay,
+                                Days = Array.Empty<DayOfWeek>()
+                            }).ToArray(),
+                Unit = (MedUnit)me.Unit,
+                Until = me.UntilDate,
+                Uuid = me.Uuid,
+                
             };
 
         return await unsyncedMedications.ToArrayAsync();

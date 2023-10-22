@@ -20,4 +20,11 @@ public class SyncController : JournalyControllerBase
     {
         return new JsonResult(await _syncService.GetUnsyncedJournalData(GetUserId(), GetDeviceId()));
     }
+
+    [Route("med")]
+    [HttpGet]
+    public async Task<JsonResult> SyncMeds()
+    {
+        return new JsonResult(await _syncService.GetUnsyncedMedData(GetUserId(), GetDeviceId()));
+    }
 }
