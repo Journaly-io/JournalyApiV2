@@ -126,7 +126,7 @@ public class MedDbService : IMedDbService
         if (dbSchedule == null)
         {
             if (patch.MedicationUuid == null)
-                throw new ArgumentException("MedicationUuid is required to create a new scnedule");
+                throw new ArgumentException("MedicationUuid is required to create a new schedule");
             dbSchedule = new MedSchedule
             {
                 Uuid = patch.Uuid,
