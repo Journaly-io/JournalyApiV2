@@ -3,6 +3,7 @@ using JournalyApiV2.Data;
 using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
 using Microsoft.EntityFrameworkCore;
+using Medication = JournalyApiV2.Data.Models.Medication;
 using RecordType = JournalyApiV2.Data.Enums.RecordType;
 
 namespace JournalyApiV2.Services.DAL;
@@ -138,5 +139,27 @@ public class SyncDbService : ISyncDbService
             };
 
         return await unsyncedCategories.ToArrayAsync();
+    }
+
+    public async Task<Models.Medication[]> GetUnsyncedMedications(Guid userGuid, Guid deviceGuid)
+    {
+        await using var db = _db.Journaly();
+        var unsyncedMedications =
+            from me in db.Medications
+            let synced = db.SyncedRecords.Any(sr =>
+                sr.RecordId == me.Uuid && sr.DeviceId == deviceGuid && sr.RecordType == RecordType.Med && !sr.IsVoid)
+            where me.Owner == userGuid && !synced
+            select new Models.Medication
+            {
+                DefaultDose = me.DefaultDose,
+                Deleted = me.Deleted,
+                Forever = me.Forever,
+                From = me.FromDate,
+                Name = me.Name,
+                Notes = me.Notes,
+                Schedules = Array.Empty<Schedule>() // TODO: this
+            };
+
+        return await unsyncedMedications.ToArrayAsync();
     }
 }
