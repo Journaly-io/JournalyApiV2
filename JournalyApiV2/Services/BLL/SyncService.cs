@@ -14,6 +14,31 @@ public class SyncService : ISyncService
         _syncDbService = syncDbService;
     }
 
+    public async Task<SyncMedResponse> GetUnsyncedMedData(Guid userGuid, Guid deviceGuid)
+    {
+        var medsTask = Task.Run(() => _syncDbService.GetUnsyncedMedications(userGuid, deviceGuid));
+
+        await Task.WhenAll(medsTask);
+
+        var meds = medsTask.Result;
+
+        var medSyncs = meds.Select(x => new RecordSync
+        {
+            DeviceId = deviceGuid,
+            RecordId = x.Uuid,
+            RecordType = RecordType.Med
+        });
+
+        var recordSyncs = medSyncs.ToArray();
+
+        await _syncDbService.MarkSynced(recordSyncs);
+
+        return new SyncMedResponse
+        {
+            Medications = meds
+        };
+    }
+    
     public async Task<SyncJournalResponse> GetUnsyncedJournalData(Guid userGuid, Guid deviceGuid)
     {
         var journalEntriesTask = Task.Run(() => _syncDbService.GetUnsyncedJournalEntries(userGuid, deviceGuid));
