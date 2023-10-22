@@ -17,10 +17,12 @@ public class SyncService : ISyncService
     public async Task<SyncMedResponse> GetUnsyncedMedData(Guid userGuid, Guid deviceGuid)
     {
         var medsTask = Task.Run(() => _syncDbService.GetUnsyncedMedications(userGuid, deviceGuid));
+        var schedulesTask = Task.Run(() => _syncDbService.GetUnsyncedSchedules(userGuid, deviceGuid));
 
-        await Task.WhenAll(medsTask);
+        await Task.WhenAll(medsTask, schedulesTask);
 
         var meds = medsTask.Result;
+        var schedules = schedulesTask.Result;
 
         var medSyncs = meds.Select(x => new RecordSync
         {
@@ -29,13 +31,21 @@ public class SyncService : ISyncService
             RecordType = RecordType.Med
         });
 
-        var recordSyncs = medSyncs.ToArray();
+        var scheduleSyncs = schedules.Select(x => new RecordSync
+        {
+            DeviceId = deviceGuid,
+            RecordId = x.Uuid,
+            RecordType = RecordType.Schedule
+        });
+
+        var recordSyncs = medSyncs.Concat(scheduleSyncs).ToArray();
 
         await _syncDbService.MarkSynced(recordSyncs);
 
         return new SyncMedResponse
         {
-            Medications = meds
+            Medications = meds,
+            Schedules = schedules
         };
     }
     

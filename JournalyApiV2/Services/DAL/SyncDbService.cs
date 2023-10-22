@@ -163,7 +163,25 @@ public class SyncDbService : ISyncDbService
                 Uuid = me.Uuid,
                 
             };
-
         return await unsyncedMedications.ToArrayAsync();
+    }
+
+    public async Task<Models.Schedule[]> GetUnsyncedSchedules(Guid userGuid, Guid deviceGuid)
+    {
+        await using var db = _db.Journaly();
+        var unsyncedSchedules =
+            from sc in db.MedSchedules
+            let synced = db.SyncedRecords.Any(sr =>
+                sr.RecordId == sc.Uuid && sr.DeviceId == deviceGuid && sr.RecordTypeId == (short)RecordType.Schedule &&
+                !sr.IsVoid)
+            where sc.Owner == userGuid && !synced
+            select new Models.Schedule
+            {
+                Uuid = sc.Uuid,
+                Time = sc.Time,
+                EveryOtherDay = sc.EveryOtherDay,
+                Days = sc.Days.Select(x => (DayOfWeek)x.DayId).ToArray()
+            };
+        return await unsyncedSchedules.ToArrayAsync();
     }
 }
