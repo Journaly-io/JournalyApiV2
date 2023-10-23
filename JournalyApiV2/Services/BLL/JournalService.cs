@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace JournalyApiV2.Services.BLL;
 
-[Authorize]
 public class JournalService : IJournalService
 {
     private readonly IJournalDbService _journalDbService;
