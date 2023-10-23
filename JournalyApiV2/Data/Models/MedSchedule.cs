@@ -24,6 +24,9 @@ public class MedSchedule
     
     [Column("Owner")]
     public Guid Owner { get; set; }
+
+    [Column("Deleted")] 
+    public bool Deleted { get; set; } = false;
     
     // Navigation properties
     public Medication Medication { get; set; }

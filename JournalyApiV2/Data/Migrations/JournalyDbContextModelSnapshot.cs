@@ -301,6 +301,10 @@ namespace JournalyApiV2.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("Uuid");
 
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("Deleted");
+
                     b.Property<bool>("EveryOtherDay")
                         .HasColumnType("boolean")
                         .HasColumnName("EveryOtherDay");

@@ -181,7 +181,8 @@ public class SyncDbService : ISyncDbService
                 Time = sc.Time,
                 MedicationUuid = sc.MedicationUuid,
                 EveryOtherDay = sc.EveryOtherDay,
-                Days = sc.Days.Select(x => (DayOfWeek)x.DayId).ToArray()
+                Days = sc.Days.Select(x => (DayOfWeek)x.DayId).ToArray(),
+                Deleted = sc.Deleted
             };
         return await unsyncedSchedules.ToArrayAsync();
     }

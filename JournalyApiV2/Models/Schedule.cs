@@ -7,4 +7,5 @@ public class Schedule
     public TimeOnly Time { get; set; }
     public bool EveryOtherDay { get; set; }
     public DayOfWeek[] Days { get; set; }
+    public bool Deleted { get; set; }
 }

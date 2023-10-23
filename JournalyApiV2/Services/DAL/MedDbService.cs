@@ -139,6 +139,7 @@ public class MedDbService : IMedDbService
 
         if (patch.Time != null) dbSchedule.Time = patch.Time.Value;
         if (patch.EveryOtherDay != null) dbSchedule.EveryOtherDay = patch.EveryOtherDay.Value;
+        if (patch.Deleted != null) dbSchedule.Deleted = patch.Deleted.Value;
         await db.SaveChangesAsync(); // save now so we dont violate the constraint when we add days
         if (patch.Days != null)
         {

@@ -40,5 +40,6 @@ public class PatchMedsRequest
         public TimeOnly? Time { get; set; }
         public bool? EveryOtherDay { get; set; }
         public short[]? Days { get; set; }
+        public bool? Deleted { get; set; }
     }
 }
