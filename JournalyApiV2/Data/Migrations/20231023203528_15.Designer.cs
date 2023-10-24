@@ -3,6 +3,7 @@ using System;
 using JournalyApiV2.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JournalyApiV2.Data.Migrations
 {
     [DbContext(typeof(JournalyDbContext))]
-    partial class JournalyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231023203528_15")]
+    partial class _15
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -472,6 +475,7 @@ namespace JournalyApiV2.Data.Migrations
                         .HasColumnName("Owner");
 
                     b.Property<Guid?>("ScheduleUuid")
+                        .IsRequired()
                         .HasColumnType("uuid")
                         .HasColumnName("ScheduleUuid");
 
@@ -686,7 +690,9 @@ namespace JournalyApiV2.Data.Migrations
 
                     b.HasOne("JournalyApiV2.Data.Models.MedSchedule", "Schedule")
                         .WithMany("Instances")
-                        .HasForeignKey("ScheduleUuid");
+                        .HasForeignKey("ScheduleUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Medication");
 

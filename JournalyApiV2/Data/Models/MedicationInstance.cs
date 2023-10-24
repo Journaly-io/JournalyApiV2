@@ -41,5 +41,5 @@ public class MedicationInstance
     
     // Navigation properties
     public Medication Medication { get; set; }
-    public MedSchedule Schedule { get; set; }
+    public MedSchedule? Schedule { get; set; }
 }
