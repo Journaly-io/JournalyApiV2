@@ -18,11 +18,13 @@ public class SyncService : ISyncService
     {
         var medsTask = Task.Run(() => _syncDbService.GetUnsyncedMedications(userGuid, deviceGuid));
         var schedulesTask = Task.Run(() => _syncDbService.GetUnsyncedSchedules(userGuid, deviceGuid));
+        var instancesTask = Task.Run(() => _syncDbService.GetUnsyncedMedInstances(userGuid, deviceGuid));
 
-        await Task.WhenAll(medsTask, schedulesTask);
+        await Task.WhenAll(medsTask, schedulesTask, instancesTask);
 
         var meds = medsTask.Result;
         var schedules = schedulesTask.Result;
+        var instances = instancesTask.Result;
 
         var medSyncs = meds.Select(x => new RecordSync
         {
@@ -38,14 +40,22 @@ public class SyncService : ISyncService
             RecordType = RecordType.Schedule
         });
 
-        var recordSyncs = medSyncs.Concat(scheduleSyncs).ToArray();
+        var instanceSyncs = instances.Select(x => new RecordSync
+        {
+            DeviceId = deviceGuid,
+            RecordId = x.Uuid,
+            RecordType = RecordType.MedInstance
+        });
+
+        var recordSyncs = medSyncs.Concat(scheduleSyncs).Concat(instanceSyncs).ToArray();
 
         await _syncDbService.MarkSynced(recordSyncs);
 
         return new SyncMedResponse
         {
             Medications = meds,
-            Schedules = schedules
+            Schedules = schedules,
+            MedInstances = instances
         };
     }
     

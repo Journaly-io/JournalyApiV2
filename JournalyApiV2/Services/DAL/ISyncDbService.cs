@@ -11,4 +11,5 @@ public interface ISyncDbService
     Task<Models.EmotionCategory[]> GetUnsyncedEmotionCategories(Guid userGuid, Guid deviceGuid);
     Task<Models.Medication[]> GetUnsyncedMedications(Guid userGuid, Guid deviceGuid);
     Task<Models.Schedule[]> GetUnsyncedSchedules(Guid userGuid, Guid deviceGuid);
+    Task<Models.MedInstance[]> GetUnsyncedMedInstances(Guid userGuid, Guid deviceGuid);
 }

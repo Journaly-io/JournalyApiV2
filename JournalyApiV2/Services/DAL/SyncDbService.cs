@@ -186,4 +186,26 @@ public class SyncDbService : ISyncDbService
             };
         return await unsyncedSchedules.ToArrayAsync();
     }
+
+    public async Task<Models.MedInstance[]> GetUnsyncedMedInstances(Guid userGuid, Guid deviceGuid)
+    {
+        await using var db = _db.Journaly();
+        var unsyncedInstances =
+            from mi in db.MedicationInstances
+            let synced = db.SyncedRecords.Any(sr =>
+                sr.RecordId == mi.Uuid && sr.DeviceId == deviceGuid &&
+                sr.RecordTypeId == (short)RecordType.MedInstance && !sr.IsVoid)
+            where mi.Owner == userGuid && !synced
+            select new Models.MedInstance
+            {
+                Uuid = mi.Uuid,
+                MedicationUuid = mi.MedicationUuid,
+                ScheduleUuid = mi.ScheduleUuid,
+                Dose = mi.Dose,
+                ScheduledTime = mi.ScheduledTime,
+                ActualTime = mi.ActualTime,
+                Status = mi.Status
+            };
+        return await unsyncedInstances.ToArrayAsync();
+    }
 }
