@@ -27,7 +27,7 @@ public class AuthController : JournalyControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(200, ex.Message);
+            return StatusCode(500, ex.Message);
         }
         return StatusCode(204);
     }
