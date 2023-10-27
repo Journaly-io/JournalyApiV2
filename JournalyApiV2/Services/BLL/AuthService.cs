@@ -2,147 +2,26 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using JournalyApiV2.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace JournalyApiV2.Services.BLL;
 
 public class AuthService : IAuthService
 {
-    private static string token;
-    private static DateTime tokenExpiration;
-
-    private readonly IConfiguration _config;
-
-    public AuthService(IConfiguration config)
+    private readonly UserManager<JournalyUser> _userManager;
+    public AuthService(UserManager<JournalyUser> userManager)
     {
-        _config = config;
+        _userManager = userManager;
     }
 
     public async Task CreateUser(string email, string password, string firstName, string lastName)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post,
-            new Uri(_config.GetSection("IdentityStore").GetValue<string>("AdminEndpoint") + "users"));
-        var body = new KeycloakCreateUserRequest
+        await _userManager.CreateAsync(new JournalyUser
         {
-            Email = email,
             FirstName = firstName,
             LastName = lastName,
-            Username = Guid.NewGuid().ToString(),
-            Credentials = new []{new KeycloakCredentials
-            {
-                Value = password
-            }}
-        };
-        request.Content = new StringContent(JsonSerializer.Serialize(body));
-        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");        
-        var response = await AuthenticatedRequest(request);
-        if (response.StatusCode == HttpStatusCode.Conflict)
-        {
-            throw new Exception("Conflict");
-        }
-        response.EnsureSuccessStatusCode();
-    }
-
-    private async Task<HttpResponseMessage?> AuthenticatedRequest(HttpRequestMessage request)
-    {
-        if (tokenExpiration >= DateTime.Now) await RefreshToken();
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        var client = new HttpClient();
-        var response = await client.SendAsync(request);
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            // Refresh and try again
-            await RefreshToken();
-
-            // Create a new HttpRequestMessage instance with the same properties as the original request (you cant resend a request)
-            var newRequest = new HttpRequestMessage(request.Method, request.RequestUri)
-            {
-                Content = request.Content,
-                Version = request.Version
-            };
-            foreach (var header in request.Headers)
-            {
-                newRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
-            }
-            newRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            response = await client.SendAsync(newRequest);
-        }
-
-        return response;
-    }
-
-    private async Task RefreshToken()
-    {
-        var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post,
-            new Uri(_config.GetSection("IdentityStore").GetValue<string>("Authority"))
-                + "/protocol/openid-connect/token"); // TODO: pull from .well_known
-        var collection = new List<KeyValuePair<string, string>>();
-        collection.Add(new("grant_type", "client_credentials"));
-        collection.Add(new("client_id", _config.GetSection("IdentityStore").GetValue<string>("ClientId")));
-        collection.Add(new("client_secret", _config.GetSection("IdentityStore").GetValue<string>("ClientSecret")));
-        var content = new FormUrlEncodedContent(collection);
-        request.Content = content;
-        var response = await client.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-        var payload = JsonSerializer.Deserialize<ClientCredentialsTokenResponseModel>(await response.Content.ReadAsStreamAsync());
-        token = payload.AccessToken;
-        var expiration = DateTime.Now;
-        expiration.AddSeconds(payload.ExpiresIn);
-        tokenExpiration = expiration;
-    }
-
-    private class ClientCredentialsTokenResponseModel
-    {
-        [JsonPropertyName("access_token")] 
-        public string AccessToken { get; set; }
-
-        [JsonPropertyName("expires_in")] 
-        public int ExpiresIn { get; set; }
-
-        [JsonPropertyName("refresh_expires_in")]
-        public int RefreshExpiresIn { get; set; }
-
-        [JsonPropertyName("token_type")] 
-        public string TokenType { get; set; }
-
-        [JsonPropertyName("not-before-policy")]
-        public int NotBeforePolicy { get; set; }
-
-        [JsonPropertyName("scope")] 
-        public string Scope { get; set; }
-    }
-
-    private class KeycloakCreateUserRequest
-    {
-        [JsonPropertyName("email")]
-        public string Email { get; set; }
-        
-        [JsonPropertyName("firstName")]
-        public string FirstName { get; set; }
-        
-        [JsonPropertyName("lastName")]
-        public string LastName { get; set; }
-        
-        [JsonPropertyName("enabled")]
-        public bool Enabled { get; set; } = true;
-        
-        [JsonPropertyName("username")]
-        public string Username { get; set; }
-        
-        [JsonPropertyName("credentials")]
-        public KeycloakCredentials[] Credentials { get; set; }
-    }
-
-    private class KeycloakCredentials
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; } = "password";
-        
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
-        
-        [JsonPropertyName("temporary")]
-        public bool Temporary { get; set; } = false;
+            Email = email
+        }, password);
     }
 }

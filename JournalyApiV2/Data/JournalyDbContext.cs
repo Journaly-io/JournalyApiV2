@@ -1,11 +1,19 @@
 ﻿using JournalyApiV2.Data.Models;
+using JournalyApiV2.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Activity = JournalyApiV2.Data.Models.Activity;
+using Emotion = JournalyApiV2.Data.Models.Emotion;
+using EmotionCategory = JournalyApiV2.Data.Models.EmotionCategory;
+using JournalEntry = JournalyApiV2.Data.Models.JournalEntry;
+using Medication = JournalyApiV2.Data.Models.Medication;
 using MedStatus = JournalyApiV2.Data.Enums.MedStatus;
 using RecordType = JournalyApiV2.Data.Enums.RecordType;
 
 namespace JournalyApiV2.Data;
 
-public class JournalyDbContext : DbContext
+public class JournalyDbContext : IdentityDbContext<JournalyUser>
 {
     private readonly IConfiguration _config;
 
