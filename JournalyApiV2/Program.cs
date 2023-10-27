@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using JournalyApiV2.Data;
 using JournalyApiV2.Models;
 using JournalyApiV2.Pipeline;
@@ -50,6 +51,27 @@ builder.Services.AddCors(options =>
     }
 });
 
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Identity:Issuer"],
+            ValidAudience = builder.Configuration["Identity:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Identity:Key"]))
+        };
+    });
+
+builder.Services.AddControllers(options => options.Filters.Add<HttpResponseExceptionFilter>());
 builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IJournalDbService, JournalDbService>();
 builder.Services.AddScoped<IResourceAccessHelper, ResourceAccessHelper>();

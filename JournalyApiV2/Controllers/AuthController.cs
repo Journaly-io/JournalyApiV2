@@ -1,4 +1,5 @@
 ﻿using JournalyApiV2.Models.Requests;
+using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,5 +31,21 @@ public class AuthController : JournalyControllerBase
             return StatusCode(500, ex.Message);
         }
         return StatusCode(204);
+    }
+
+    [Route("sign-in")]
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<JsonResult> SignIn([FromBody] SignInRequest request)
+    {
+        try
+        {
+            var result = await _authService.SignIn(request.Email, request.Password);
+            return new JsonResult(result);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new HttpBadRequestException(ex.Message);
+        }
     }
 }
