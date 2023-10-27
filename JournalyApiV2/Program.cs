@@ -19,7 +19,12 @@ builder.Services.AddControllers().AddNewtonsoftJson(options => // System.Text.Js
     options.SerializerSettings.Converters.Add(new TimeOnlyConverter()); // Neither will newtonsoft appearantly
 });
 
-builder.Services.AddIdentity<JournalyUser, IdentityRole>()
+builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+        options.User.AllowedUserNameCharacters = 
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    })
     .AddEntityFrameworkStores<JournalyDbContext>();
 
 
