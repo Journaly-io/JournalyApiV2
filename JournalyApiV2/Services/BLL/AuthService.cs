@@ -21,7 +21,8 @@ public class AuthService : IAuthService
         {
             FirstName = firstName,
             LastName = lastName,
-            Email = email
+            Email = email,
+            UserName = email
         }, password);
 
         if (!result.Succeeded)
