@@ -22,18 +22,33 @@ public class AuthDbService : IAuthDbService
         return Convert.ToBase64String(byteArr);
     }
     
-    public async Task<string> UpdateRefreshTokenAsync(Guid user)
+    public async Task<string?> ExchangeRefreshTokenAsync(string token)
     {
         await using var db = _db.Journaly();
-        db.RemoveRange(db.RefreshTokens.Where(x => x.UserId == user));
-        var token = GenerateSecureOpaqueToken();
-        await db.RefreshTokens.AddAsync(new RefreshToken
+        var oldToken = await db.RefreshTokens.SingleOrDefaultAsync(x => x.Token == token);
+        if (oldToken == null) return null;
+        db.Remove(oldToken);
+        var newToken = GenerateSecureOpaqueToken();
+        db.RefreshTokens.Add(new RefreshToken
         {
-            UserId = user,
-            Token = token
+            Token = newToken,
+            UserId = oldToken.UserId
         });
         await db.SaveChangesAsync();
-        return token;
+        return newToken;
+    }
+
+    public async Task<string?> NewRefreshTokenAsync(Guid user)
+    {
+        await using var db = _db.Journaly();
+        var newToken = GenerateSecureOpaqueToken();
+        db.RefreshTokens.Add(new RefreshToken
+        {
+            Token = newToken,
+            UserId = user
+        });
+        await db.SaveChangesAsync();
+        return newToken;
     }
 
     public async Task<Guid?> LookupRefreshTokenAsync(string token)

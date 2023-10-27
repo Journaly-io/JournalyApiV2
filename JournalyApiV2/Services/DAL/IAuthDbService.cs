@@ -2,6 +2,7 @@
 
 public interface IAuthDbService
 {
-    Task<string> UpdateRefreshTokenAsync(Guid user);
+    Task<string?> ExchangeRefreshTokenAsync(string token);
     Task<Guid?> LookupRefreshTokenAsync(string token);
+    Task<string?> NewRefreshTokenAsync(Guid user);
 }

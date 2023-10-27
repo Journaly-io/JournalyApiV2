@@ -70,7 +70,7 @@ public class AuthService : IAuthService
             {
                 Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName),
                 ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-                RefreshToken = await _authDbService.UpdateRefreshTokenAsync(Guid.Parse(user.Id))
+                RefreshToken = await _authDbService.NewRefreshTokenAsync(Guid.Parse(user.Id))
             };
         }
         else
@@ -105,9 +105,11 @@ public class AuthService : IAuthService
 
         var user = await _userManager.FindByIdAsync(owner.Value.ToString());
         if (user == null) throw new Exception("Refresh token is valid, but couldn't find user");
+        var newToken = await _authDbService.ExchangeRefreshTokenAsync(refreshToken);
+        if (newToken == null) throw new Exception("Failed to refresh token");
         return new SignInResponse
         {
-            RefreshToken = await _authDbService.UpdateRefreshTokenAsync(owner.Value),
+            RefreshToken = newToken,
             ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
             Token = GenerateJwtToken(user.Id, user.Email, user.FirstName, user.LastName)
         };
