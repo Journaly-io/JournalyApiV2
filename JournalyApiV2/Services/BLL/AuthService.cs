@@ -2,9 +2,12 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using JournalyApiV2.Data;
+using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
 using JournalyApiV2.Models.Responses;
 using Microsoft.AspNetCore.Identity;
@@ -17,11 +20,13 @@ public class AuthService : IAuthService
     private readonly UserManager<JournalyUser> _userManager;
     private readonly IConfiguration _config;
     private readonly SignInManager<JournalyUser> _signInManager;
-    public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager)
+    private readonly IDbFactory _db;
+    public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager, IDbFactory db)
     {
         _userManager = userManager;
         _config = config;
         _signInManager = signInManager;
+        _db = db;
     }
 
     private string GenerateJwtToken(string userId, string email, string givenName, string familyName)
@@ -50,6 +55,29 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
+    private static string GenerateSecureOpaqueToken()
+    {
+        using var rng = new RNGCryptoServiceProvider();
+        byte[] byteArr = new byte[32];
+        rng.GetBytes(byteArr);
+        return Convert.ToBase64String(byteArr);
+    }
+
+    private async Task<string> UpdateRefreshTokenAsync(Guid user)
+    {
+        using (var db = _db.Journaly())
+        {
+            db.RemoveRange(db.RefreshTokens.Where(x => x.UserId == user));
+            var token = GenerateSecureOpaqueToken();
+            await db.RefreshTokens.AddAsync(new RefreshToken
+            {
+                UserId = user,
+                Token = token
+            });
+            return token;
+        }
+    }
+    
     public async Task<SignInResponse> SignIn(string email, string password)
     {
         var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
@@ -64,7 +92,7 @@ public class AuthService : IAuthService
             {
                 Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName),
                 ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-                RefreshToken = ""
+                RefreshToken = await UpdateRefreshTokenAsync(Guid.Parse(user.Id))
             };
         }
         else
