@@ -27,8 +27,7 @@ public class AuthController : JournalyControllerBase
         }
         catch (Exception ex)
         {
-            if (ex.Message == "Conflict") return StatusCode(409);
-            throw;
+            return StatusCode(200, ex.Message);
         }
         return StatusCode(204);
     }

@@ -17,11 +17,16 @@ public class AuthService : IAuthService
 
     public async Task CreateUser(string email, string password, string firstName, string lastName)
     {
-        await _userManager.CreateAsync(new JournalyUser
+        var result = await _userManager.CreateAsync(new JournalyUser
         {
             FirstName = firstName,
             LastName = lastName,
             Email = email
         }, password);
+
+        if (!result.Succeeded)
+        {
+            throw new Exception(string.Join("\n", result.Errors.Select(x => x.Description)));
+        }
     }
 }
