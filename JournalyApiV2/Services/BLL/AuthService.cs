@@ -10,6 +10,7 @@ using JournalyApiV2.Data;
 using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
 using JournalyApiV2.Models.Responses;
+using JournalyApiV2.Services.DAL;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -20,13 +21,13 @@ public class AuthService : IAuthService
     private readonly UserManager<JournalyUser> _userManager;
     private readonly IConfiguration _config;
     private readonly SignInManager<JournalyUser> _signInManager;
-    private readonly IDbFactory _db;
-    public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager, IDbFactory db)
+    private readonly IAuthDbService _authDbService;
+    public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager, IAuthDbService authDbService)
     {
         _userManager = userManager;
         _config = config;
         _signInManager = signInManager;
-        _db = db;
+        _authDbService = authDbService;
     }
 
     private string GenerateJwtToken(string userId, string email, string givenName, string familyName)
@@ -55,29 +56,6 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
-    private static string GenerateSecureOpaqueToken()
-    {
-        using var rng = new RNGCryptoServiceProvider();
-        byte[] byteArr = new byte[32];
-        rng.GetBytes(byteArr);
-        return Convert.ToBase64String(byteArr);
-    }
-
-    private async Task<string> UpdateRefreshTokenAsync(Guid user)
-    {
-        using (var db = _db.Journaly())
-        {
-            db.RemoveRange(db.RefreshTokens.Where(x => x.UserId == user));
-            var token = GenerateSecureOpaqueToken();
-            await db.RefreshTokens.AddAsync(new RefreshToken
-            {
-                UserId = user,
-                Token = token
-            });
-            return token;
-        }
-    }
-    
     public async Task<SignInResponse> SignIn(string email, string password)
     {
         var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
@@ -92,7 +70,7 @@ public class AuthService : IAuthService
             {
                 Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName),
                 ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-                RefreshToken = await UpdateRefreshTokenAsync(Guid.Parse(user.Id))
+                RefreshToken = await _authDbService.UpdateRefreshTokenAsync(Guid.Parse(user.Id))
             };
         }
         else
@@ -115,5 +93,23 @@ public class AuthService : IAuthService
         {
             throw new Exception(string.Join("\n", result.Errors.Select(x => x.Description)));
         }
+    }
+
+    public async Task<SignInResponse> RefreshToken(string refreshToken)
+    {
+        var owner = await _authDbService.LookupRefreshTokenAsync(refreshToken);
+        if (owner == null)
+        {
+            throw new ArgumentException("Refresh token not valid");
+        }
+
+        var user = await _userManager.FindByIdAsync(owner.Value.ToString());
+        if (user == null) throw new Exception("Refresh token is valid, but couldn't find user");
+        return new SignInResponse
+        {
+            RefreshToken = await _authDbService.UpdateRefreshTokenAsync(owner.Value),
+            ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
+            Token = GenerateJwtToken(user.Id, user.Email, user.FirstName, user.LastName)
+        };
     }
 }

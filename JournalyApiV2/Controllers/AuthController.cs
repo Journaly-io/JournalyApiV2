@@ -48,4 +48,20 @@ public class AuthController : JournalyControllerBase
             throw new HttpBadRequestException(ex.Message);
         }
     }
+
+    [Route("refresh-token")]
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<JsonResult> RefreshToken([FromBody]string token)
+    {
+        try
+        {
+            var result = await _authService.RefreshToken(token);
+            return new JsonResult(result);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new HttpBadRequestException(ex.Message);
+        }
+    }
 }

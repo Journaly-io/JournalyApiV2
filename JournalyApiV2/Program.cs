@@ -1,6 +1,7 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using JournalyApiV2.Data;
+using JournalyApiV2.Extensions;
 using JournalyApiV2.Models;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
@@ -71,7 +72,12 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddControllers(options => options.Filters.Add<HttpResponseExceptionFilter>());
+builder.Services.AddControllers(options =>
+    {
+        options.Filters.Add<HttpResponseExceptionFilter>();
+        options.InputFormatters.Insert(options.InputFormatters.Count, new TextPlainInputFormatter());
+    }
+);
 builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IJournalDbService, JournalDbService>();
 builder.Services.AddScoped<IResourceAccessHelper, ResourceAccessHelper>();
@@ -80,6 +86,7 @@ builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMedService, MedService>();
 builder.Services.AddScoped<IMedDbService, MedDbService>();
+builder.Services.AddScoped<IAuthDbService, AuthDbService>();
 builder.Services.AddDbContext<JournalyDbContext>(); // Do not use this. This API uses concurrency a ton and this will cause race conditions
 builder.Services.AddTransient<IDbFactory, DbFactory>(); // Use this instead 
 
