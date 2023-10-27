@@ -62,7 +62,7 @@ public class AuthService : IAuthService
             }
             return new SignInResponse
             {
-                Token = GenerateJwtToken(email, password, user.FirstName, user.LastName),
+                Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName),
                 ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
                 RefreshToken = ""
             };
