@@ -7,4 +7,5 @@ public interface IAuthDbService
     Task<RefreshToken?> ExchangeRefreshTokenAsync(string token);
     Task<Guid?> LookupRefreshTokenAsync(string token);
     Task<RefreshToken> NewRefreshTokenAsync(Guid user);
+    Task VoidRefreshTokenAsync(int TokenId);
 }

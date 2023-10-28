@@ -39,7 +39,7 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.GivenName, givenName),
             new Claim(JwtRegisteredClaimNames.FamilyName, familyName),
-            new Claim("TokenId", tokenId.ToString())
+            new Claim("token_id", tokenId.ToString())
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Identity:Key"]));
@@ -57,7 +57,7 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
-    public async Task<SignInResponse> SignIn(string email, string password)
+    public async Task<AuthenticationResponse> SignIn(string email, string password)
     {
         var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
         if (result.Succeeded)
@@ -69,7 +69,7 @@ public class AuthService : IAuthService
             }
 
             var refreshToken = await _authDbService.NewRefreshTokenAsync(Guid.Parse(user.Id));
-            return new SignInResponse
+            return new AuthenticationResponse
             {
                 Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName, refreshToken.TokenId),
                 ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
@@ -98,7 +98,7 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task<SignInResponse> RefreshToken(string refreshToken)
+    public async Task<AuthenticationResponse> RefreshToken(string refreshToken)
     {
         var owner = await _authDbService.LookupRefreshTokenAsync(refreshToken);
         if (owner == null)
@@ -110,11 +110,33 @@ public class AuthService : IAuthService
         if (user == null) throw new Exception("Refresh token is valid, but couldn't find user");
         var newToken = await _authDbService.ExchangeRefreshTokenAsync(refreshToken);
         if (newToken == null) throw new Exception("Failed to refresh token");
-        return new SignInResponse
+        return new AuthenticationResponse
         {
             RefreshToken = newToken.Token,
             ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
             Token = GenerateJwtToken(user.Id, user.Email, user.FirstName, user.LastName, newToken.TokenId)
+        };
+    }
+
+    public async Task<AuthenticationResponse> ChangeName(string firstName, string lastName, Guid userId, int tokenId)
+    {
+        // Change name
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null) throw new ArgumentException("User not found");
+        user.FirstName = firstName;
+        user.LastName = lastName;
+        await _userManager.UpdateAsync(user);
+        
+        // Generate new JWT and associated refresh token with the name updated
+        await _authDbService.VoidRefreshTokenAsync(tokenId);
+        var refreshToken = await _authDbService.NewRefreshTokenAsync(userId);
+        var accessToken = GenerateJwtToken(userId.ToString(), user.Email, firstName, lastName, refreshToken.TokenId);
+        
+        return new AuthenticationResponse
+        {
+            ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
+            RefreshToken = refreshToken.Token,
+            Token = accessToken
         };
     }
 }

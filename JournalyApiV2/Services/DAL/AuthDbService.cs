@@ -38,7 +38,7 @@ public class AuthDbService : IAuthDbService
         return new Models.RefreshToken
         {
             Token = newToken,
-            TokenId = result.Entity.Id
+            TokenId = result.Entity.Id 
         };
     }
 
@@ -63,5 +63,14 @@ public class AuthDbService : IAuthDbService
         await using var db = _db.Journaly();
         var result = await db.RefreshTokens.SingleOrDefaultAsync(x => x.Token == token);
         return result?.UserId;
+    }
+
+    public async Task VoidRefreshTokenAsync(int TokenId)
+    {
+        await using var db = _db.Journaly();
+        var result = await db.RefreshTokens.FindAsync(TokenId);
+        if (result == null) throw new ArgumentException("Token not found");
+        db.Remove(result);
+        await db.SaveChangesAsync();
     }
 }
