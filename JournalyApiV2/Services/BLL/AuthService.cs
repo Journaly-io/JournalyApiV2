@@ -30,7 +30,7 @@ public class AuthService : IAuthService
         _authDbService = authDbService;
     }
 
-    private string GenerateJwtToken(string userId, string email, string givenName, string familyName)
+    private string GenerateJwtToken(string userId, string email, string givenName, string familyName, int tokenId)
     {
         var claims = new List<Claim>
         {
@@ -38,7 +38,8 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Email, email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.GivenName, givenName),
-            new Claim(JwtRegisteredClaimNames.FamilyName, familyName)
+            new Claim(JwtRegisteredClaimNames.FamilyName, familyName),
+            new Claim("TokenId", tokenId.ToString())
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Identity:Key"]));
@@ -66,11 +67,13 @@ public class AuthService : IAuthService
             {
                 throw new Exception("Email and password is valid, but no user found");
             }
+
+            var refreshToken = await _authDbService.NewRefreshTokenAsync(Guid.Parse(user.Id));
             return new SignInResponse
             {
-                Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName),
+                Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName, refreshToken.TokenId),
                 ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-                RefreshToken = await _authDbService.NewRefreshTokenAsync(Guid.Parse(user.Id))
+                RefreshToken = refreshToken.Token
             };
         }
         else
@@ -109,9 +112,9 @@ public class AuthService : IAuthService
         if (newToken == null) throw new Exception("Failed to refresh token");
         return new SignInResponse
         {
-            RefreshToken = newToken,
+            RefreshToken = newToken.Token,
             ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-            Token = GenerateJwtToken(user.Id, user.Email, user.FirstName, user.LastName)
+            Token = GenerateJwtToken(user.Id, user.Email, user.FirstName, user.LastName, newToken.TokenId)
         };
     }
 }
