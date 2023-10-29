@@ -31,6 +31,7 @@ public class AuthController : JournalyControllerBase
         {
             return StatusCode(500, ex.Message);
         }
+
         return StatusCode(204);
     }
 
@@ -51,9 +52,9 @@ public class AuthController : JournalyControllerBase
     }
 
     [Route("refresh-token")]
-    [HttpPost] 
+    [HttpPost]
     [AllowAnonymous]
-    public async Task<JsonResult> RefreshToken([FromBody]string token)
+    public async Task<JsonResult> RefreshToken([FromBody] string token)
     {
         try
         {
@@ -72,7 +73,20 @@ public class AuthController : JournalyControllerBase
     {
         var tokenId = User.FindFirst("token_id");
         if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
-        var result = await _authService.ChangeName(request.FirstName, request.LastName, GetUserId(), int.Parse(tokenId.Value));
+        var result =
+            await _authService.ChangeName(request.FirstName, request.LastName, GetUserId(), int.Parse(tokenId.Value));
         return new JsonResult(result);
     }
+
+    [Route("change-email")]
+    [HttpPost]
+    public async Task<JsonResult> ChangeEmail([FromBody] ChangeEmailRequest request)
+    {
+        var tokenId = User.FindFirst("token_id");
+        if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
+        var result =
+            await _authService.ChangeEmail(request.Email, GetUserId(), int.Parse(tokenId.Value));
+        return new JsonResult(result);
+    }
+
 }

@@ -139,4 +139,25 @@ public class AuthService : IAuthService
             Token = accessToken
         };
     }
+
+    public async Task<AuthenticationResponse> ChangeEmail(string email, Guid userId, int tokenId)
+    {
+        // change email
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null) throw new ArgumentException("User not found");
+        user.Email = email;
+        await _userManager.UpdateAsync(user);
+        
+        // Generate new JWT and associated refresh token with the name updated
+        await _authDbService.VoidRefreshTokenAsync(tokenId);
+        var refreshToken = await _authDbService.NewRefreshTokenAsync(userId);
+        var accessToken = GenerateJwtToken(userId.ToString(), email, user.FirstName, user.LastName, refreshToken.TokenId);
+        
+        return new AuthenticationResponse
+        {
+            ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
+            RefreshToken = refreshToken.Token,
+            Token = accessToken
+        };
+    }
 }
