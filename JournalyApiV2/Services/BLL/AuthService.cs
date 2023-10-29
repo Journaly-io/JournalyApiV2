@@ -59,15 +59,14 @@ public class AuthService : IAuthService
     
     public async Task<AuthenticationResponse> SignIn(string email, string password)
     {
-        var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new ArgumentException("Incorrect Email or Password");
+        }
+        var result = await _signInManager.PasswordSignInAsync(user.UserName, password, false, false);
         if (result.Succeeded)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                throw new Exception("Email and password is valid, but no user found");
-            }
-
             var refreshToken = await _authDbService.NewRefreshTokenAsync(Guid.Parse(user.Id));
             return new AuthenticationResponse
             {
