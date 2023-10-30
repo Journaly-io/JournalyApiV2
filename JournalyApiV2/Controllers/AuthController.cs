@@ -27,6 +27,10 @@ public class AuthController : JournalyControllerBase
         {
             await _authService.CreateUser(request.Email, request.Password, request.FirstName, request.LastName);
         }
+        catch (ArgumentException ex)
+        {
+            return StatusCode(409, ex.Message);
+        }
         catch (Exception ex)
         {
             return StatusCode(500, ex.Message);

@@ -83,6 +83,7 @@ public class AuthService : IAuthService
     
     public async Task CreateUser(string email, string password, string firstName, string lastName)
     {
+        if (await _userManager.FindByEmailAsync(email) != null) throw new ArgumentException("Email already in use");
         var result = await _userManager.CreateAsync(new JournalyUser
         {
             FirstName = firstName,
@@ -145,6 +146,7 @@ public class AuthService : IAuthService
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null) throw new ArgumentException("User not found");
         user.Email = email;
+        user.UserName = email;
         await _userManager.UpdateAsync(user);
         
         // Generate new JWT and associated refresh token with the name updated
