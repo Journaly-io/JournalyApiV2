@@ -9,4 +9,5 @@ public interface IAuthService
     Task<AuthenticationResponse> RefreshToken(string refreshToken);
     Task<AuthenticationResponse> ChangeName(string firstName, string lastName, Guid userId, int tokenId);
     Task<AuthenticationResponse> ChangeEmail(string email, Guid userId, int tokenId);
+    Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId);
 }

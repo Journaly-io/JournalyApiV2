@@ -89,4 +89,22 @@ public class AuthController : JournalyControllerBase
         return new JsonResult(result);
     }
 
+    [Route("change-password")]
+    [HttpPost]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var tokenId = User.FindFirst("token_id");
+        if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
+        try
+        {
+            await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword,
+                int.Parse(tokenId.Value));
+        }
+        catch (ArgumentException)
+        {
+            throw new HttpBadRequestException("Incorrect current password");
+        }
+
+        return StatusCode(204);
+    }
 }

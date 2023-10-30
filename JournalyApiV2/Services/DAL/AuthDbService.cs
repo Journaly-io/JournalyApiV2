@@ -21,7 +21,7 @@ public class AuthDbService : IAuthDbService
         rng.GetBytes(byteArr);
         return Convert.ToBase64String(byteArr);
     }
-    
+
     public async Task<Models.RefreshToken?> ExchangeRefreshTokenAsync(string token)
     {
         await using var db = _db.Journaly();
@@ -38,7 +38,7 @@ public class AuthDbService : IAuthDbService
         return new Models.RefreshToken
         {
             Token = newToken,
-            TokenId = result.Entity.Id 
+            TokenId = result.Entity.Id
         };
     }
 
@@ -56,7 +56,8 @@ public class AuthDbService : IAuthDbService
         {
             Token = newToken,
             TokenId = result.Entity.Id
-        };    }
+        };
+    }
 
     public async Task<Guid?> LookupRefreshTokenAsync(string token)
     {
@@ -65,12 +66,23 @@ public class AuthDbService : IAuthDbService
         return result?.UserId;
     }
 
-    public async Task VoidRefreshTokenAsync(int TokenId)
+    public async Task VoidRefreshTokensAsync(params int[] tokenIds)
     {
         await using var db = _db.Journaly();
-        var result = await db.RefreshTokens.FindAsync(TokenId);
-        if (result == null) throw new ArgumentException("Token not found");
-        db.Remove(result);
+        // Use the Contains method to find tokens whose Id is in the tokenIds array.
+        var tokens = db.RefreshTokens.Where(up => tokenIds.Contains(up.Id));
+        db.RemoveRange(tokens);
         await db.SaveChangesAsync();
     }
+
+    public async Task<Models.RefreshToken[]> GetRefreshTokensAsync(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        return db.RefreshTokens.Where(x => x.UserId == userId).Select(x => new Models.RefreshToken
+        {
+            Token = x.Token,
+            TokenId = x.Id
+        }).ToArray();
+    }
+
 }

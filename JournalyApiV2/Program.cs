@@ -26,6 +26,13 @@ builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
         options.User.RequireUniqueEmail = true;
         options.User.AllowedUserNameCharacters = 
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        // TODO: make these configurable in appsettings.json
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequiredUniqueChars = 1;
     })
     .AddEntityFrameworkStores<JournalyDbContext>();
 

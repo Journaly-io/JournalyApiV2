@@ -127,7 +127,7 @@ public class AuthService : IAuthService
         await _userManager.UpdateAsync(user);
         
         // Generate new JWT and associated refresh token with the name updated
-        await _authDbService.VoidRefreshTokenAsync(tokenId);
+        await _authDbService.VoidRefreshTokensAsync(tokenId);
         var refreshToken = await _authDbService.NewRefreshTokenAsync(userId);
         var accessToken = GenerateJwtToken(userId.ToString(), user.Email, firstName, lastName, refreshToken.TokenId);
         
@@ -148,7 +148,7 @@ public class AuthService : IAuthService
         await _userManager.UpdateAsync(user);
         
         // Generate new JWT and associated refresh token with the name updated
-        await _authDbService.VoidRefreshTokenAsync(tokenId);
+        await _authDbService.VoidRefreshTokensAsync(tokenId);
         var refreshToken = await _authDbService.NewRefreshTokenAsync(userId);
         var accessToken = GenerateJwtToken(userId.ToString(), email, user.FirstName, user.LastName, refreshToken.TokenId);
         
@@ -158,5 +158,20 @@ public class AuthService : IAuthService
             RefreshToken = refreshToken.Token,
             Token = accessToken
         };
+    }
+
+    public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null) throw new ArgumentException("User not found");
+        var result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+
+        if (!result.Succeeded)
+        {
+            throw new ArgumentException("Password is incorrect");
+        }
+
+        var existingRefreshTokens = await _authDbService.GetRefreshTokensAsync(userId);
+        await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Where(x => x.TokenId != tokenId).Select(x => x.TokenId).ToArray());
     }
 }
