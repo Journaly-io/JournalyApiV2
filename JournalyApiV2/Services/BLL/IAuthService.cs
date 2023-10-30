@@ -6,6 +6,7 @@ public interface IAuthService
 {
     Task CreateUser(string email, string password, string firstName, string lastName);
     Task<AuthenticationResponse> SignIn(string email, string password);
+    Task VoidToken(int tokenId);
     Task<AuthenticationResponse> RefreshToken(string refreshToken);
     Task<AuthenticationResponse> ChangeName(string firstName, string lastName, Guid userId, int tokenId);
     Task<AuthenticationResponse> ChangeEmail(string email, Guid userId, int tokenId);

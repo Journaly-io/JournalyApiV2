@@ -80,6 +80,11 @@ public class AuthService : IAuthService
             throw new ArgumentException("Incorrect Email or Password");
         }
     }
+
+    public async Task VoidToken(int tokenId)
+    {
+        await _authDbService.VoidRefreshTokensAsync(tokenId);
+    }
     
     public async Task CreateUser(string email, string password, string firstName, string lastName)
     {

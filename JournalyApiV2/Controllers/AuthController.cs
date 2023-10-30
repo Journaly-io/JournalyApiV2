@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using JournalyApiV2.Models.Requests;
+﻿using JournalyApiV2.Models.Requests;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
 using Microsoft.AspNetCore.Authorization;
@@ -53,6 +52,23 @@ public class AuthController : JournalyControllerBase
         {
             throw new HttpBadRequestException(ex.Message);
         }
+    }
+
+    [Route("sign-out")]
+    [HttpGet]
+    public async Task<ActionResult> SignOut()
+    {
+        try
+        {
+            var tokenId = User.FindFirst("token_id");
+            if (tokenId != null) await _authService.VoidToken(Convert.ToInt32(tokenId.Value));
+        }
+        catch (ArgumentException)
+        {
+            // ignored
+        }
+
+        return Ok();
     }
 
     [Route("refresh-token")]
