@@ -204,6 +204,7 @@ public class SyncDbService : ISyncDbService
                 Dose = mi.Dose,
                 ScheduledTime = mi.ScheduledTime,
                 ActualTime = mi.ActualTime,
+                Deleted = mi.Deleted,
                 Status = mi.Status
             };
         return await unsyncedInstances.ToArrayAsync();

@@ -10,5 +10,6 @@ public class MedInstance
     public short Dose { get; set; }
     public DateTime? ScheduledTime { get; set; } // Can be null if unscheduled
     public DateTime? ActualTime { get; set; } // Can be null if scheduled but not taken yet
+    public bool Deleted { get; set; }
     public Data.Enums.MedStatus Status { get; set; }
 }
