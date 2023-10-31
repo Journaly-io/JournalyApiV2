@@ -32,7 +32,7 @@ public class AuthService : IAuthService
         _emailService = emailService;
     }
 
-    private string GenerateJwtToken(string userId, string email, string givenName, string familyName, int tokenId)
+    private string GenerateJwtToken(string userId, string email, string givenName, string familyName, int tokenId, bool verified)
     {
         var claims = new List<Claim>
         {
@@ -41,7 +41,8 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.GivenName, givenName),
             new Claim(JwtRegisteredClaimNames.FamilyName, familyName),
-            new Claim("token_id", tokenId.ToString())
+            new Claim("token_id", tokenId.ToString()),
+            new Claim("email_verified", verified ? "true" : "false")
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Identity:Key"]));
@@ -72,7 +73,7 @@ public class AuthService : IAuthService
             var refreshToken = await _authDbService.NewRefreshTokenAsync(Guid.Parse(user.Id));
             return new AuthenticationResponse
             {
-                Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName, refreshToken.TokenId),
+                Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName, refreshToken.TokenId, user.EmailConfirmed),
                 ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
                 RefreshToken = refreshToken.Token
             };
@@ -123,7 +124,7 @@ public class AuthService : IAuthService
         {
             RefreshToken = newToken.Token,
             ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-            Token = GenerateJwtToken(user.Id, user.Email, user.FirstName, user.LastName, newToken.TokenId)
+            Token = GenerateJwtToken(user.Id, user.Email, user.FirstName, user.LastName, newToken.TokenId, user.EmailConfirmed)
         };
     }
 
@@ -139,7 +140,7 @@ public class AuthService : IAuthService
         // Generate new JWT and associated refresh token with the name updated
         await _authDbService.VoidRefreshTokensAsync(tokenId);
         var refreshToken = await _authDbService.NewRefreshTokenAsync(userId);
-        var accessToken = GenerateJwtToken(userId.ToString(), user.Email, firstName, lastName, refreshToken.TokenId);
+        var accessToken = GenerateJwtToken(userId.ToString(), user.Email, firstName, lastName, refreshToken.TokenId, user.EmailConfirmed);
         
         return new AuthenticationResponse
         {
@@ -161,7 +162,7 @@ public class AuthService : IAuthService
         // Generate new JWT and associated refresh token with the name updated
         await _authDbService.VoidRefreshTokensAsync(tokenId);
         var refreshToken = await _authDbService.NewRefreshTokenAsync(userId);
-        var accessToken = GenerateJwtToken(userId.ToString(), email, user.FirstName, user.LastName, refreshToken.TokenId);
+        var accessToken = GenerateJwtToken(userId.ToString(), email, user.FirstName, user.LastName, refreshToken.TokenId, user.EmailConfirmed);
         
         return new AuthenticationResponse
         {
