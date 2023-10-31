@@ -149,7 +149,15 @@ public class AuthController : JournalyControllerBase
         }
         else
         {
-            
+            if (request.ShortCode == null) throw new HttpBadRequestException("No verification code provided");
+            try
+            {
+                await _authService.VerifyEmailWithShortCode(GetUserId(), request.ShortCode);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new HttpBadRequestException(ex.Message);
+            }
         }
 
         return StatusCode(204);

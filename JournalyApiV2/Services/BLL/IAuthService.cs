@@ -13,4 +13,5 @@ public interface IAuthService
     Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId);
     Task VerifyEmail(Guid userId, string toEmail, string firstName, string lastName);
     Task VerifyEmailWithLongCode(string longCode);
+    Task VerifyEmailWithShortCode(Guid userId, string shortCode);
 }

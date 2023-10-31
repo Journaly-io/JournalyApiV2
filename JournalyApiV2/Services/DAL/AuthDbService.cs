@@ -142,4 +142,12 @@ public class AuthDbService : IAuthDbService
         db.RemoveRange(toRemove);
         await db.SaveChangesAsync();
     }
+
+    public async Task<bool> CheckShortCode(Guid userId, string shortCode)
+    {
+        await using var db = _db.Journaly();
+        var code = await db.EmailVerificationCodes.SingleOrDefaultAsync(x => x.User == userId && x.ShortCode == shortCode);
+
+        return code != null;
+    }
 }

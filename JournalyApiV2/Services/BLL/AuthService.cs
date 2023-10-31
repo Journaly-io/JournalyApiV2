@@ -206,4 +206,22 @@ public class AuthService : IAuthService
 
         await _userManager.UpdateAsync(userObj);
     }
+
+    public async Task VerifyEmailWithShortCode(Guid userId, string shortCode)
+    {
+        var result = await _authDbService.CheckShortCode(userId, shortCode);
+
+        if (result)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null) throw new Exception("Short code was found, but not the associated user");
+            user.EmailConfirmed = true;
+            await _userManager.UpdateAsync(user);
+            await _authDbService.VerifyUser(userId);
+        }
+        else
+        {
+            throw new ArgumentException("Invalid verification code");
+        }
+    }
 }
