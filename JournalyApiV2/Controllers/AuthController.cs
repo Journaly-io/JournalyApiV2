@@ -138,7 +138,14 @@ public class AuthController : JournalyControllerBase
     {
         if (request.LongCode != null)
         {
-            await _authService.VerifyEmailWithLongCode(request.LongCode);
+            try
+            {
+                await _authService.VerifyEmailWithLongCode(request.LongCode);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new HttpBadRequestException(ex.Message);
+            }
         }
         else
         {
