@@ -128,4 +128,18 @@ public class AuthDbService : IAuthDbService
             LongCode = longCode
         };
     }
+
+    public async Task<Guid?> GetUserByLongCode(string longCode)
+    {
+        await using var db = _db.Journaly();
+        return (await db.EmailVerificationCodes.SingleOrDefaultAsync(x => x.LongCode == longCode))?.User;
+    }
+
+    public async Task VerifyUser(Guid user)
+    {
+        await using var db = _db.Journaly();
+        var toRemove = db.EmailVerificationCodes.Where(x => x.User == user);
+        db.RemoveRange(toRemove);
+        await db.SaveChangesAsync();
+    }
 }

@@ -113,4 +113,21 @@ public class AuthController : JournalyControllerBase
 
         return StatusCode(204);
     }
+
+    [Route("verify-email")]
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
+    {
+        if (request.LongCode != null)
+        {
+            await _authService.VerifyEmailWithLongCode(request.LongCode);
+        }
+        else
+        {
+            
+        }
+
+        return StatusCode(204);
+    }
 }

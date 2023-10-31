@@ -186,4 +186,18 @@ public class AuthService : IAuthService
         var codes = await _authDbService.GetOrCreateEmailVerificationCode(userId);
         await _emailService.SendVerificationEmailAsync(toEmail, firstName, lastName, codes);
     }
+
+    public async Task VerifyEmailWithLongCode(string longCode)
+    {
+        var user = await _authDbService.GetUserByLongCode(longCode);
+
+        if (user == null) throw new ArgumentException("Invalid verification code");
+
+        await _authDbService.VerifyUser(user.Value);
+        var userObj = await _userManager.FindByIdAsync(user.Value.ToString());
+
+        userObj.EmailConfirmed = true;
+
+        await _userManager.UpdateAsync(userObj);
+    }
 }
