@@ -1,4 +1,5 @@
-﻿using JournalyApiV2.Pipeline;
+﻿using System.Text;
+using JournalyApiV2.Pipeline;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 
@@ -17,8 +18,9 @@ public class AuthorizationMiddlewareResultHandler : IAuthorizationMiddlewareResu
             && authorizeResult.AuthorizationFailure!.FailedRequirements
                 .OfType<EmailConfirmedRequirement>().Any())
         {
-            // Return a 404 to make it appear as if the resource doesn't exist.
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+
+            context.Response.StatusCode = 403;
+            await context.Response.WriteAsync("Email not verified");
             return;
         }
 

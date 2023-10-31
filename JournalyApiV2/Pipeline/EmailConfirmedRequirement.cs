@@ -25,9 +25,5 @@ public class EmailConfirmedHandler : AuthorizationHandler<EmailConfirmedRequirem
         {
             context.Succeed(requirement);
         }
-        else
-        {
-            context.Fail();
-        }
     }
 }
