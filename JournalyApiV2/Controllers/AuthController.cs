@@ -154,4 +154,11 @@ public class AuthController : JournalyControllerBase
 
         return StatusCode(204);
     }
+
+    [Route("poll-email-verification")]
+    [HttpGet]
+    public async Task<IActionResult> PollEmailVerification()
+    {
+        return StatusCode(204); // The middleware will force a 403 if email is not verified
+    }
 }
