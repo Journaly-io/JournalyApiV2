@@ -54,7 +54,9 @@ public class AuthController : JournalyControllerBase
             throw new HttpBadRequestException(ex.Message);
         }
     }
+    
 
+    
     [Route("refresh-token")]
     [HttpPost]
     [AllowAnonymous]

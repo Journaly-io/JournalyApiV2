@@ -88,6 +88,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMedService, MedService>();
 builder.Services.AddScoped<IMedDbService, MedDbService>();
 builder.Services.AddScoped<IAuthDbService, AuthDbService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddDbContext<JournalyDbContext>(); // Do not use this. This API uses concurrency a ton and this will cause race conditions
 builder.Services.AddTransient<IDbFactory, DbFactory>(); // Use this instead 
 builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>

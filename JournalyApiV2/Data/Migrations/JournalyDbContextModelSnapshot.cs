@@ -107,6 +107,35 @@ namespace JournalyApiV2.Data.Migrations
                     b.ToTable("Day");
                 });
 
+            modelBuilder.Entity("JournalyApiV2.Data.Models.EmailVerificationCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("LongCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("LongCode");
+
+                    b.Property<string>("ShortCode")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("ShortCode");
+
+                    b.Property<Guid>("User")
+                        .HasColumnType("uuid")
+                        .HasColumnName("User");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmailVerificationCode");
+                });
+
             modelBuilder.Entity("JournalyApiV2.Data.Models.Emotion", b =>
                 {
                     b.Property<Guid>("Uuid")
