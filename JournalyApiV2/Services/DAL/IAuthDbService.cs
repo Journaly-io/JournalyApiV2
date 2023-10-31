@@ -9,4 +9,7 @@ public interface IAuthDbService
     Task<RefreshToken> NewRefreshTokenAsync(Guid user);
     Task VoidRefreshTokensAsync(params int[] tokenIds);
     Task<RefreshToken[]> GetRefreshTokensAsync(Guid userId);
+    Task<EmailVerification> GetOrCreateEmailVerificationCode(Guid userId);
+    Task<Guid?> GetUserByLongCode(string longCode);
+    Task VerifyUser(Guid user);
 }

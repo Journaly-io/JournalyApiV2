@@ -22,12 +22,14 @@ public class AuthService : IAuthService
     private readonly IConfiguration _config;
     private readonly SignInManager<JournalyUser> _signInManager;
     private readonly IAuthDbService _authDbService;
-    public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager, IAuthDbService authDbService)
+    private readonly IEmailService _emailService;
+    public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager, IAuthDbService authDbService, IEmailService emailService)
     {
         _userManager = userManager;
         _config = config;
         _signInManager = signInManager;
         _authDbService = authDbService;
+        _emailService = emailService;
     }
 
     private string GenerateJwtToken(string userId, string email, string givenName, string familyName, int tokenId)
@@ -96,11 +98,13 @@ public class AuthService : IAuthService
             Email = email,
             UserName = email
         }, password);
-
         if (!result.Succeeded)
         {
             throw new Exception(string.Join("\n", result.Errors.Select(x => x.Description)));
         }
+
+        var newUser = await _userManager.FindByEmailAsync(email);
+        await VerifyEmail(Guid.Parse(newUser.Id), newUser.Email, newUser.FirstName, newUser.LastName);
     }
 
     public async Task<AuthenticationResponse> RefreshToken(string refreshToken)
@@ -180,5 +184,25 @@ public class AuthService : IAuthService
 
         var existingRefreshTokens = await _authDbService.GetRefreshTokensAsync(userId);
         await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Where(x => x.TokenId != tokenId).Select(x => x.TokenId).ToArray());
+    }
+
+    public async Task VerifyEmail(Guid userId, string toEmail, string firstName, string lastName)
+    {
+        var codes = await _authDbService.GetOrCreateEmailVerificationCode(userId);
+        await _emailService.SendVerificationEmailAsync(toEmail, firstName, lastName, codes);
+    }
+
+    public async Task VerifyEmailWithLongCode(string longCode)
+    {
+        var user = await _authDbService.GetUserByLongCode(longCode);
+
+        if (user == null) throw new ArgumentException("Invalid verification code");
+
+        await _authDbService.VerifyUser(user.Value);
+        var userObj = await _userManager.FindByIdAsync(user.Value.ToString());
+
+        userObj.EmailConfirmed = true;
+
+        await _userManager.UpdateAsync(userObj);
     }
 }

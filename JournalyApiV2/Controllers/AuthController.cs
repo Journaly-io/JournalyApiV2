@@ -1,4 +1,5 @@
-﻿using JournalyApiV2.Models.Requests;
+﻿using System.Security.Claims;
+using JournalyApiV2.Models.Requests;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
 using Microsoft.AspNetCore.Authorization;
@@ -53,6 +54,7 @@ public class AuthController : JournalyControllerBase
             throw new HttpBadRequestException(ex.Message);
         }
     }
+    
 
     [Route("sign-out")]
     [HttpGet]
@@ -71,6 +73,7 @@ public class AuthController : JournalyControllerBase
         return Ok();
     }
 
+    
     [Route("refresh-token")]
     [HttpPost]
     [AllowAnonymous]
@@ -123,6 +126,23 @@ public class AuthController : JournalyControllerBase
         catch (ArgumentException)
         {
             throw new HttpBadRequestException("Incorrect current password");
+        }
+
+        return StatusCode(204);
+    }
+
+    [Route("verify-email")]
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
+    {
+        if (request.LongCode != null)
+        {
+            await _authService.VerifyEmailWithLongCode(request.LongCode);
+        }
+        else
+        {
+            
         }
 
         return StatusCode(204);

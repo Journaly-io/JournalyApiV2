@@ -3,6 +3,7 @@ using System;
 using JournalyApiV2.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JournalyApiV2.Data.Migrations
 {
     [DbContext(typeof(JournalyDbContext))]
-    partial class JournalyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231031025719_VerificationCodes")]
+    partial class VerificationCodes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -116,20 +119,15 @@ namespace JournalyApiV2.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("LongCode")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("LongCode");
-
-                    b.Property<string>("ShortCode")
-                        .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("character varying(6)")
-                        .HasColumnName("ShortCode");
-
                     b.Property<Guid>("User")
                         .HasColumnType("uuid")
                         .HasColumnName("User");
+
+                    b.Property<string>("VerificationCode")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("VerificationCode");
 
                     b.HasKey("Id");
 
