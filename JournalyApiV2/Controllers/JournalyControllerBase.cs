@@ -1,11 +1,12 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 
 namespace JournalyApiV2.Controllers;
 
-[Authorize]
+[Authorize(Policy = "EmailConfirmed")]
 public class JournalyControllerBase : ControllerBase
 {
     protected Guid GetUserId()

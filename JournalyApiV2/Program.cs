@@ -7,6 +7,7 @@ using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
 using JournalyApiV2.Services.DAL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -20,21 +21,6 @@ builder.Services.AddControllers().AddNewtonsoftJson(options => // System.Text.Js
 {
     options.SerializerSettings.Converters.Add(new TimeOnlyConverter()); // Neither will newtonsoft appearantly
 });
-
-builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
-    {
-        options.User.RequireUniqueEmail = true;
-        options.User.AllowedUserNameCharacters = 
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-        // TODO: make these configurable in appsettings.json
-        options.Password.RequireDigit = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = true;
-        options.Password.RequiredLength = 6;
-        options.Password.RequiredUniqueChars = 1;
-    })
-    .AddEntityFrameworkStores<JournalyDbContext>();
 
 
 // Configure cross-origin resource sharing
@@ -79,6 +65,14 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationMiddlewareResultHandler>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EmailConfirmed", policy =>
+        policy.Requirements.Add(new EmailConfirmedRequirement()));
+});
+
+
 builder.Services.AddControllers(options =>
     {
         options.Filters.Add<HttpResponseExceptionFilter>();
@@ -96,6 +90,20 @@ builder.Services.AddScoped<IMedDbService, MedDbService>();
 builder.Services.AddScoped<IAuthDbService, AuthDbService>();
 builder.Services.AddDbContext<JournalyDbContext>(); // Do not use this. This API uses concurrency a ton and this will cause race conditions
 builder.Services.AddTransient<IDbFactory, DbFactory>(); // Use this instead 
+builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+        options.User.AllowedUserNameCharacters = 
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequiredUniqueChars = 1;
+    })
+    .AddEntityFrameworkStores<JournalyDbContext>();
+builder.Services.AddScoped<IAuthorizationHandler, EmailConfirmedHandler>();
 
 var app = builder.Build();
 
