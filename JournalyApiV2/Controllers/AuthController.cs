@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using JournalyApiV2.Models;
 using JournalyApiV2.Models.Requests;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
@@ -168,5 +169,28 @@ public class AuthController : JournalyControllerBase
     public async Task<IActionResult> PollEmailVerification()
     {
         return StatusCode(204); // The middleware will force a 403 if email is not verified
+    }
+
+    [Route("resend-verification-email")]
+    [HttpGet]
+    // This is to bypass the email-confirmed policy
+    [AllowAnonymous]
+    [Authorize]
+    public async Task<IActionResult> ResendVerificationEmail()
+    {
+        try
+        {
+            await _authService.ResendVerificationEmailAsync(GetUserId());
+        }
+        catch (TooEarlyException ex)
+        {
+            throw new HttpBadRequestException(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new HttpBadRequestException(ex.Message);
+        }
+
+        return StatusCode(204);
     }
 }

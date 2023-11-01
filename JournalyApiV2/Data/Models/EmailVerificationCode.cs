@@ -20,4 +20,7 @@ public class EmailVerificationCode
     
     [Column("User")]
     public Guid User { get; set; }
+    
+    [Column("LastSent")]
+    public DateTime LastSent { get; set; }
 }

@@ -105,11 +105,12 @@ public class AuthDbService : IAuthDbService
         await using var db = _db.Journaly();
         var code = await db.EmailVerificationCodes.SingleOrDefaultAsync(x => x.User == userId);
 
-        if (code != null) return new EmailVerification
-        {
-            ShortCode = code.ShortCode,
-            LongCode = code.LongCode
-        };
+        if (code != null)
+            return new EmailVerification
+            {
+                ShortCode = code.ShortCode,
+                LongCode = code.LongCode
+            };
 
         var shortCode = GenerateSecureShortCode();
         var longCode = GenerateSecureOpaqueToken();
@@ -129,7 +130,18 @@ public class AuthDbService : IAuthDbService
         };
     }
 
-    public async Task<Guid?> GetUserByLongCode(string longCode)
+    public async Task ResetEmailVerificationTimerAsync(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        var code = await db.EmailVerificationCodes.SingleOrDefaultAsync(x => x.User == userId);
+        if (code == null) throw new ArgumentException("No user verification found for given ID");
+        if (code.LastSent.AddSeconds(60) >= DateTime.UtcNow)
+            throw new TooEarlyException($"Too early to resend: Please wait an additional {Convert.ToInt16((code.LastSent.AddSeconds(60) - DateTime.UtcNow).TotalSeconds)} seconds");
+        code.LastSent = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+    }
+
+public async Task<Guid?> GetUserByLongCode(string longCode)
     {
         await using var db = _db.Journaly();
         return (await db.EmailVerificationCodes.SingleOrDefaultAsync(x => x.LongCode == longCode))?.User;

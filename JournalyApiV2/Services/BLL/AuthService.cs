@@ -224,4 +224,12 @@ public class AuthService : IAuthService
             throw new ArgumentException("Invalid verification code");
         }
     }
+
+    public async Task ResendVerificationEmailAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null) throw new ArgumentException("User not found");
+        await _authDbService.ResetEmailVerificationTimerAsync(userId);
+        await VerifyEmail(userId, user.Email, user.FirstName, user.LastName);
+    }
 }

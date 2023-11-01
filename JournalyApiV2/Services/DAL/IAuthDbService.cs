@@ -13,4 +13,5 @@ public interface IAuthDbService
     Task<Guid?> GetUserByLongCode(string longCode);
     Task VerifyUser(Guid user);
     Task<bool> CheckShortCode(Guid userId, string shortCode);
+    Task ResetEmailVerificationTimerAsync(Guid userId);
 }
