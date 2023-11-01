@@ -35,7 +35,7 @@ public class EmailService : IEmailService
         var data = new
         {
             name = firstName,
-            verificationLink = "https://link.journaly.io/password?" + code
+            verificationLink = $"https://link.journaly.io/password?email={toEmail}&code={code}"
         };
         msg.SetTemplateData(data);
 
