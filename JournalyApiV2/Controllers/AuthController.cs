@@ -207,6 +207,26 @@ public class AuthController : JournalyControllerBase
         {
             // Ignore argumentException - this means the email was not found but we don't want the user to know that
         }
+        catch (TooEarlyException ex)
+        {
+            throw new HttpBadRequestException(ex.Message);
+        }
+        return StatusCode(204);
+    }
+    
+    [Route("submit-password-reset")]
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> SubmitPasswordReset([FromBody] ResetPasswordRequest request)
+    {
+        try
+        {
+            await _authService.SubmitPasswordResetAsync(request.Code, request.NewPassword);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new HttpBadRequestException(ex.Message);
+        }
         return StatusCode(204);
     }
 }

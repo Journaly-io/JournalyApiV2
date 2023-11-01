@@ -245,15 +245,27 @@ public class AuthService : IAuthService
         }
         else
         {
-            try
-            {
-                await _authDbService.ResetPasswordResetTimerAsync(Guid.Parse(user.Id));
-            }
-            catch (TooEarlyException ex)
-            {
-                throw new HttpBadRequestException(ex.Message);
-            }
+            await _authDbService.ResetPasswordResetTimerAsync(Guid.Parse(user.Id));
         }
         await _emailService.SendPasswordResetEmailAsync(user.Email, user.FirstName, user.LastName, code);
     }
+
+    public async Task SubmitPasswordResetAsync(string code, string password)
+    {
+        var userGuid = await _authDbService.LookupPasswordResetAsync(code);
+        if (userGuid == null) throw new ArgumentException("Invalid password reset code");
+        var user = await _userManager.FindByIdAsync(userGuid.Value.ToString());
+        if (user == null) throw new Exception("User not found");
+        await _userManager.RemovePasswordAsync(user);
+        var result = await _userManager.AddPasswordAsync(user, password);
+        if (result.Succeeded)
+        {
+            await _authDbService.ResetPassword(userGuid.Value);
+        }
+        else
+        {
+            throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description).ToArray()));
+        }
+    }
+    
 }

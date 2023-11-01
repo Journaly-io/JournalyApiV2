@@ -202,4 +202,20 @@ public class AuthDbService : IAuthDbService
         code.LastSent = DateTime.UtcNow;
         await db.SaveChangesAsync();
     }
+    
+    public async Task<Guid?> LookupPasswordResetAsync(string code)
+    {
+        await using var db = _db.Journaly();
+        var codeObj = await db.PasswordResetCodes.SingleOrDefaultAsync(x => x.Code == code);
+
+        return codeObj?.User;
+    }
+
+    public async Task ResetPassword(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        var toRemove = db.PasswordResetCodes.Where(x => x.User == userId);
+        db.RemoveRange(toRemove);
+        await db.SaveChangesAsync();
+    }
 }
