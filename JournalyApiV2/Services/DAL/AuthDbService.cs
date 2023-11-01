@@ -136,12 +136,13 @@ public class AuthDbService : IAuthDbService
         var code = await db.EmailVerificationCodes.SingleOrDefaultAsync(x => x.User == userId);
         if (code == null) throw new ArgumentException("No user verification found for given ID");
         if (code.LastSent.AddSeconds(60) >= DateTime.UtcNow)
-            throw new TooEarlyException($"Too early to resend: Please wait an additional {Convert.ToInt16((code.LastSent.AddSeconds(60) - DateTime.UtcNow).TotalSeconds)} seconds");
+            throw new TooEarlyException(
+                $"Too early to resend: Please wait an additional {Convert.ToInt16((code.LastSent.AddSeconds(60) - DateTime.UtcNow).TotalSeconds)} seconds");
         code.LastSent = DateTime.UtcNow;
         await db.SaveChangesAsync();
     }
 
-public async Task<Guid?> GetUserByLongCode(string longCode)
+    public async Task<Guid?> GetUserByLongCode(string longCode)
     {
         await using var db = _db.Journaly();
         return (await db.EmailVerificationCodes.SingleOrDefaultAsync(x => x.LongCode == longCode))?.User;
@@ -158,27 +159,47 @@ public async Task<Guid?> GetUserByLongCode(string longCode)
     public async Task<bool> CheckShortCode(Guid userId, string shortCode)
     {
         await using var db = _db.Journaly();
-        var code = await db.EmailVerificationCodes.SingleOrDefaultAsync(x => x.User == userId && x.ShortCode == shortCode);
+        var code = await db.EmailVerificationCodes.SingleOrDefaultAsync(x =>
+            x.User == userId && x.ShortCode == shortCode);
 
         return code != null;
     }
 
-    public async Task<string> GetOrGeneratePasswordResetCode(Guid userId)
+    public async Task<string?> GetPasswordResetCode(Guid userId)
     {
         await using var db = _db.Journaly();
         var code = await db.PasswordResetCodes.SingleOrDefaultAsync(x => x.User == userId);
-        if (code == null)
+        return code?.Code;
+    }
+
+    public async Task<string> GeneratePasswordResetCode(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        var code = await db.PasswordResetCodes.SingleOrDefaultAsync(x => x.User == userId);
+        if (code != null) return code.Code;
+
+        code = new PasswordResetCode
         {
-            code = new PasswordResetCode
-            {
-                User = userId,
-                Code = GenerateSecureOpaqueToken(),
-                LastSent = DateTime.UtcNow
-            };
-            await db.PasswordResetCodes.AddAsync(code);
-            await db.SaveChangesAsync();
-        }
+            Code = GenerateSecureOpaqueToken(),
+            LastSent = DateTime.UtcNow,
+            User = userId
+        };
+
+        await db.PasswordResetCodes.AddAsync(code);
+        await db.SaveChangesAsync();
 
         return code.Code;
+    }
+
+    public async Task ResetPasswordResetTimerAsync(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        var code = await db.PasswordResetCodes.SingleOrDefaultAsync(x => x.User == userId);
+        if (code == null) throw new ArgumentException("User not found");
+        if (code.LastSent.AddSeconds(60) >= DateTime.UtcNow)
+            throw new TooEarlyException(
+                $"Too early to send another reset, please try again in {Convert.ToInt16((code.LastSent.AddSeconds(60) - DateTime.UtcNow).TotalSeconds)} seconds");
+        code.LastSent = DateTime.UtcNow;
+        await db.SaveChangesAsync();
     }
 }

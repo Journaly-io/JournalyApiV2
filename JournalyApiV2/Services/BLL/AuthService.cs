@@ -10,6 +10,7 @@ using JournalyApiV2.Data;
 using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
 using JournalyApiV2.Models.Responses;
+using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.DAL;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -237,7 +238,22 @@ public class AuthService : IAuthService
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null) throw new ArgumentException("User not found");
-        var code =  await _authDbService.GetOrGeneratePasswordResetCode(Guid.Parse(user.Id));
+        var code = await _authDbService.GetPasswordResetCode(Guid.Parse(user.Id));
+        if (code == null)
+        {
+            code = await _authDbService.GeneratePasswordResetCode(Guid.Parse(user.Id));
+        }
+        else
+        {
+            try
+            {
+                await _authDbService.ResetPasswordResetTimerAsync(Guid.Parse(user.Id));
+            }
+            catch (TooEarlyException ex)
+            {
+                throw new HttpBadRequestException(ex.Message);
+            }
+        }
         await _emailService.SendPasswordResetEmailAsync(user.Email, user.FirstName, user.LastName, code);
     }
 }

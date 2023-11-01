@@ -14,5 +14,7 @@ public interface IAuthDbService
     Task VerifyUser(Guid user);
     Task<bool> CheckShortCode(Guid userId, string shortCode);
     Task ResetEmailVerificationTimerAsync(Guid userId);
-    Task<string> GetOrGeneratePasswordResetCode(Guid userId);
+    Task<string?> GetPasswordResetCode(Guid userId);
+    Task<string> GeneratePasswordResetCode(Guid userId);
+    Task ResetPasswordResetTimerAsync(Guid userId);
 }
