@@ -15,4 +15,5 @@ public interface IAuthService
     Task VerifyEmailWithLongCode(string longCode);
     Task VerifyEmailWithShortCode(Guid userId, string shortCode);
     Task ResendVerificationEmailAsync(Guid userId);
+    Task ResetPasswordAsync(string email);
 }

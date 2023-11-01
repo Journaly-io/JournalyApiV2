@@ -232,4 +232,12 @@ public class AuthService : IAuthService
         await _authDbService.ResetEmailVerificationTimerAsync(userId);
         await VerifyEmail(userId, user.Email, user.FirstName, user.LastName);
     }
+
+    public async Task ResetPasswordAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null) throw new ArgumentException("User not found");
+        var code =  await _authDbService.GetOrGeneratePasswordResetCode(Guid.Parse(user.Id));
+        await _emailService.SendPasswordResetEmailAsync(user.Email, user.FirstName, user.LastName, code);
+    }
 }

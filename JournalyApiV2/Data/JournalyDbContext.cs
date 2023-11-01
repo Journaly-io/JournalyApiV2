@@ -36,6 +36,7 @@ public class JournalyDbContext : IdentityDbContext<JournalyUser>
     public DbSet<Data.Models.MedStatus> MedStatuses { get; set; }
     public DbSet<Data.Models.RefreshToken> RefreshTokens { get; set; }
     public DbSet<EmailVerificationCode> EmailVerificationCodes { get; set; }
+    public DbSet<PasswordResetCode> PasswordResetCodes { get; set; }
     
     public JournalyDbContext(IConfiguration config)
     {

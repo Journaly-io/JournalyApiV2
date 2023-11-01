@@ -162,4 +162,23 @@ public async Task<Guid?> GetUserByLongCode(string longCode)
 
         return code != null;
     }
+
+    public async Task<string> GetOrGeneratePasswordResetCode(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        var code = await db.PasswordResetCodes.SingleOrDefaultAsync(x => x.User == userId);
+        if (code == null)
+        {
+            code = new PasswordResetCode
+            {
+                User = userId,
+                Code = GenerateSecureOpaqueToken(),
+                LastSent = DateTime.UtcNow
+            };
+            await db.PasswordResetCodes.AddAsync(code);
+            await db.SaveChangesAsync();
+        }
+
+        return code.Code;
+    }
 }

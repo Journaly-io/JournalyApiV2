@@ -525,6 +525,33 @@ namespace JournalyApiV2.Data.Migrations
                     b.ToTable("MedicationInstance");
                 });
 
+            modelBuilder.Entity("JournalyApiV2.Data.Models.PasswordResetCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Code");
+
+                    b.Property<DateTime>("LastSent")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("LastSent");
+
+                    b.Property<Guid>("User")
+                        .HasColumnType("uuid")
+                        .HasColumnName("User");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PasswordResetCode");
+                });
+
             modelBuilder.Entity("JournalyApiV2.Data.Models.RecordType", b =>
                 {
                     b.Property<short>("Id")

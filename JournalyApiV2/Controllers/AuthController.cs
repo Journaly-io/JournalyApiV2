@@ -193,4 +193,20 @@ public class AuthController : JournalyControllerBase
 
         return StatusCode(204);
     }
+
+    [Route("reset-password")]
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] string email)
+    {
+        try
+        {
+            await _authService.ResetPasswordAsync(email);
+        }
+        catch (ArgumentException)
+        {
+            // Ignore argumentException - this means the email was not found but we don't want the user to know that
+        }
+        return StatusCode(204);
+    }
 }
