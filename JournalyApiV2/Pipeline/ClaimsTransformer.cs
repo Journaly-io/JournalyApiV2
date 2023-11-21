@@ -14,7 +14,7 @@ public class ClaimsTransformer : IClaimsTransformation
         {
             if (!claimsIdentity.HasClaim(c => c.Type == "token_id"))
             {
-                var tokenIdClaim = claimsIdentity.FindFirst("your_token_id_claim_name_in_token");
+                var tokenIdClaim = claimsIdentity.FindFirst("token_id");
 
                 if (tokenIdClaim != null)
                 {
