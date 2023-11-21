@@ -37,7 +37,7 @@ public class EmailService : IEmailService
         var data = new
         {
             name = firstName,
-            verificationLink = code
+            verificationLink = url
         };
         msg.SetTemplateData(data);
 
