@@ -84,7 +84,6 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = builder.Configuration["Identity:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Identity:Key"]))
         };
-        options.MapInboundClaims = false;
     });
 
 
