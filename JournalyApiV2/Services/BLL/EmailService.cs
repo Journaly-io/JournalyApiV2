@@ -1,4 +1,5 @@
-﻿using JournalyApiV2.Models;
+﻿using JournalyApiV2.Extensions;
+using JournalyApiV2.Models;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -32,10 +33,11 @@ public class EmailService : IEmailService
     {
         var msg = new SendGridMessage();
         msg.SetTemplateId(_config.GetValue<string>("SendGrid:Templates:PasswordReset"));
+        var url = new Uri("https://link.journaly.io/password").AddParameter("email", toEmail).AddParameter("code", code);
         var data = new
         {
             name = firstName,
-            verificationLink = $"https://link.journaly.io/password?email={toEmail}&code={code.Replace("+", "%2B")}"
+            verificationLink = code
         };
         msg.SetTemplateData(data);
 
