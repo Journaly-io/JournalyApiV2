@@ -46,53 +46,12 @@ builder.Services.AddCors(options =>
     }
 });
 
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-
-            ValidIssuer = builder.Configuration["Identity:Issuer"],
-            ValidAudience = builder.Configuration["Identity:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Identity:Key"]))
-        };
-        options.MapInboundClaims = true;
-    });
-
-builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationMiddlewareResultHandler>();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("EmailConfirmed", policy =>
         policy.Requirements.Add(new EmailConfirmedRequirement()));
 });
 
-
-builder.Services.AddControllers(options =>
-    {
-        options.Filters.Add<HttpResponseExceptionFilter>();
-        options.InputFormatters.Insert(options.InputFormatters.Count, new TextPlainInputFormatter());
-    }
-);
-builder.Services.AddScoped<IJournalService, JournalService>();
-builder.Services.AddScoped<IJournalDbService, JournalDbService>();
-builder.Services.AddScoped<IResourceAccessHelper, ResourceAccessHelper>();
-builder.Services.AddScoped<ISyncDbService, SyncDbService>();
-builder.Services.AddScoped<ISyncService, SyncService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IMedService, MedService>();
-builder.Services.AddScoped<IMedDbService, MedDbService>();
-builder.Services.AddScoped<IAuthDbService, AuthDbService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddDbContext<JournalyDbContext>(); // Do not use this. This API uses concurrency a ton and this will cause race conditions
-builder.Services.AddTransient<IDbFactory, DbFactory>(); // Use this instead 
 builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
     {
         options.User.RequireUniqueEmail = true;
@@ -106,12 +65,55 @@ builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
         options.Password.RequiredUniqueChars = 1;
     })
     .AddEntityFrameworkStores<JournalyDbContext>();
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = false,
+            ValidateIssuerSigningKey = false,
+
+            ValidIssuer = builder.Configuration["Identity:Issuer"],
+            ValidAudience = builder.Configuration["Identity:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Identity:Key"]))
+        };
+        options.MapInboundClaims = false;
+    });
+
+
+
+
+builder.Services.AddControllers(options =>
+    {
+        options.Filters.Add<HttpResponseExceptionFilter>();
+        options.InputFormatters.Insert(options.InputFormatters.Count, new TextPlainInputFormatter());
+    }
+);
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationMiddlewareResultHandler>();
+builder.Services.AddScoped<IJournalService, JournalService>();
+builder.Services.AddScoped<IJournalDbService, JournalDbService>();
+builder.Services.AddScoped<IResourceAccessHelper, ResourceAccessHelper>();
+builder.Services.AddScoped<ISyncDbService, SyncDbService>();
+builder.Services.AddScoped<ISyncService, SyncService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IMedService, MedService>();
+builder.Services.AddScoped<IMedDbService, MedDbService>();
+builder.Services.AddScoped<IAuthDbService, AuthDbService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddDbContext<JournalyDbContext>(); // Do not use this. This API uses concurrency a ton and this will cause race conditions
+builder.Services.AddTransient<IDbFactory, DbFactory>(); // Use this instead 
 builder.Services.AddScoped<IAuthorizationHandler, EmailConfirmedHandler>();
-builder.Services.AddScoped<IClaimsTransformation, ClaimsTransformer>();
 
 var app = builder.Build();
 
- 
+
 app.UseAuthentication();
 app.UseAuthorization();
 
