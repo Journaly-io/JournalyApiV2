@@ -173,7 +173,7 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId)
+    public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId, bool signOutEverywhere = true)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null) throw new ArgumentException("User not found");
@@ -184,8 +184,11 @@ public class AuthService : IAuthService
             throw new ArgumentException("Password is incorrect");
         }
 
-        var existingRefreshTokens = await _authDbService.GetRefreshTokensAsync(userId);
-        await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Where(x => x.TokenId != tokenId).Select(x => x.TokenId).ToArray());
+        if (signOutEverywhere)
+        {
+            var existingRefreshTokens = await _authDbService.GetRefreshTokensAsync(userId);
+            await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Where(x => x.TokenId != tokenId).Select(x => x.TokenId).ToArray());   
+        }
     }
 
     public async Task VerifyEmail(Guid userId, string toEmail, string firstName, string lastName)

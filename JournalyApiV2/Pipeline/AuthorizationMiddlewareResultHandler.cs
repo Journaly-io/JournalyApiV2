@@ -28,3 +28,4 @@ public class AuthorizationMiddlewareResultHandler : IAuthorizationMiddlewareResu
         await defaultHandler.HandleAsync(next, context, policy, authorizeResult);
     }
 }
+  

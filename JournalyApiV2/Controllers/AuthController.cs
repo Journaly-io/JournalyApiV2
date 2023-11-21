@@ -122,7 +122,7 @@ public class AuthController : JournalyControllerBase
         try
         {
             await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword,
-                int.Parse(tokenId.Value));
+                int.Parse(tokenId.Value), request.SignOutEverywhere);
         }
         catch (ArgumentException)
         {

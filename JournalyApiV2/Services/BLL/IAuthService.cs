@@ -10,7 +10,7 @@ public interface IAuthService
     Task<AuthenticationResponse> RefreshToken(string refreshToken);
     Task<AuthenticationResponse> ChangeName(string firstName, string lastName, Guid userId, int tokenId);
     Task<AuthenticationResponse> ChangeEmail(string email, Guid userId, int tokenId);
-    Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId);
+    Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId, bool signOutEverywhere = true);
     Task VerifyEmail(Guid userId, string toEmail, string firstName, string lastName);
     Task VerifyEmailWithLongCode(string longCode);
     Task VerifyEmailWithShortCode(Guid userId, string shortCode);

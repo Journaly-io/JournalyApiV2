@@ -6,6 +6,7 @@ using JournalyApiV2.Models;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
 using JournalyApiV2.Services.DAL;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -63,6 +64,7 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = builder.Configuration["Identity:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Identity:Key"]))
         };
+        options.MapInboundClaims = true;
     });
 
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationMiddlewareResultHandler>();
@@ -105,6 +107,7 @@ builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
     })
     .AddEntityFrameworkStores<JournalyDbContext>();
 builder.Services.AddScoped<IAuthorizationHandler, EmailConfirmedHandler>();
+builder.Services.AddScoped<IClaimsTransformation, ClaimsTransformer>();
 
 var app = builder.Build();
 
