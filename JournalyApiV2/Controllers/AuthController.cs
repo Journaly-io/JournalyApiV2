@@ -229,4 +229,15 @@ public class AuthController : JournalyControllerBase
         }
         return StatusCode(204);
     }
+
+    [Route("sign-out-everywhere")]
+    [HttpGet]
+    public async Task<IActionResult> SignOutEverywhere()
+    {
+        var tokenId = User.FindFirst("token_id");
+        if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
+        await _authService.SignOutEverywhereAsync(GetUserId(), Convert.ToInt32(tokenId.Value));
+
+        return StatusCode(204);
+    }
 }

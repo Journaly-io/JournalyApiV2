@@ -186,8 +186,7 @@ public class AuthService : IAuthService
 
         if (signOutEverywhere)
         {
-            var existingRefreshTokens = await _authDbService.GetRefreshTokensAsync(userId);
-            await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Where(x => x.TokenId != tokenId).Select(x => x.TokenId).ToArray());   
+            await SignOutEverywhereAsync(userId, tokenId);
         }
     }
 
@@ -272,9 +271,14 @@ public class AuthService : IAuthService
         
         if (signOutEverywhere)
         {
-            var existingRefreshTokens = await _authDbService.GetRefreshTokensAsync(userGuid.Value);
-            await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Select(x => x.TokenId).ToArray());   
+            await SignOutEverywhereAsync(userGuid.Value, null);
         }
+    }
+
+    public async Task SignOutEverywhereAsync(Guid userId, int? tokenId)
+    {
+        var existingRefreshTokens = await _authDbService.GetRefreshTokensAsync(userId);
+        await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Where(x => x.TokenId != tokenId).Select(x => x.TokenId).ToArray());   
     }
     
 }
