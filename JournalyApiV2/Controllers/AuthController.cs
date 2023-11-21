@@ -221,7 +221,7 @@ public class AuthController : JournalyControllerBase
     {
         try
         {
-            await _authService.SubmitPasswordResetAsync(request.Code, request.NewPassword);
+            await _authService.SubmitPasswordResetAsync(request.Code, request.NewPassword, request.SignOutEverywhere);
         }
         catch (ArgumentException ex)
         {

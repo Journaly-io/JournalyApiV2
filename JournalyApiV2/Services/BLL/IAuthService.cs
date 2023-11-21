@@ -16,5 +16,5 @@ public interface IAuthService
     Task VerifyEmailWithShortCode(Guid userId, string shortCode);
     Task ResendVerificationEmailAsync(Guid userId);
     Task ResetPasswordAsync(string email);
-    Task SubmitPasswordResetAsync(string code, string password);
+    Task SubmitPasswordResetAsync(string code, string password, bool signOutEverywhere = true);
 }

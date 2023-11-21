@@ -253,7 +253,7 @@ public class AuthService : IAuthService
         await _emailService.SendPasswordResetEmailAsync(user.Email, user.FirstName, user.LastName, code);
     }
 
-    public async Task SubmitPasswordResetAsync(string code, string password)
+    public async Task SubmitPasswordResetAsync(string code, string password, bool signOutEverywhere)
     {
         var userGuid = await _authDbService.LookupPasswordResetAsync(code);
         if (userGuid == null) throw new ArgumentException("Invalid password reset code");
@@ -268,6 +268,12 @@ public class AuthService : IAuthService
         else
         {
             throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description).ToArray()));
+        }
+        
+        if (signOutEverywhere)
+        {
+            var existingRefreshTokens = await _authDbService.GetRefreshTokensAsync(userGuid.Value);
+            await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Select(x => x.TokenId).ToArray());   
         }
     }
     
