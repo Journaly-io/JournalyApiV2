@@ -121,7 +121,7 @@ public class MedDbService : IMedDbService
     private async Task SyncSingleSchedule(PatchMedsRequest.SchedulePatch patch, Guid owner)
     {
         await using var db = _db.Journaly();
-        var transaction = db.Database.BeginTransaction();
+        var transaction = await db.Database.BeginTransactionAsync();
         var dbSchedule = await db.MedSchedules.FindAsync(patch.Uuid);
         
         if (dbSchedule == null)
@@ -160,4 +160,28 @@ public class MedDbService : IMedDbService
         await transaction.CommitAsync();
     }
 
+    public async Task ClearMedsAsync(Guid user)
+    {
+        await using var db = _db.Journaly();
+
+        // Remove med instances
+        var instancesToRemove = db.MedicationInstances.Where(x => x.Owner == user);
+        db.MedicationInstances.RemoveRange(instancesToRemove);
+        
+        // Remove schedules
+        var schedulesToRemove = db.MedSchedules.Where(x => x.Owner == user);
+        db.MedSchedules.RemoveRange(schedulesToRemove);
+        
+        // Remove meds
+        var medsToRemove = db.Medications.Where(x => x.Owner == user);
+        db.Medications.RemoveRange(medsToRemove);
+
+        // Remove med syncs
+        var guids = instancesToRemove.Select(x => x.Uuid).Concat(medsToRemove.Select(x => x.Uuid)).Concat(instancesToRemove.Select(x => x.Uuid));
+        var syncsToRemove = db.SyncedRecords.Where(x => guids.Contains(x.RecordId));
+        db.SyncedRecords.RemoveRange(syncsToRemove);
+        
+        // Save
+        await db.SaveChangesAsync();
+    }
 }
