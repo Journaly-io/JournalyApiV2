@@ -96,7 +96,8 @@ public class JournalDbService : IJournalDbService
         if (emotion.Name != null) dbEmotion.Name = emotion.Name;
         if (emotion.Order != null) dbEmotion.Order = emotion.Order.Value;
         if (emotion.Icon != null) dbEmotion.Icon = emotion.Icon;
-        if (emotion.IconType != null) dbEmotion.IconTypeId = await GetIconTypeIdByName(emotion.IconType);
+        if (!string.IsNullOrEmpty(emotion.IconType)) dbEmotion.IconTypeId = await GetIconTypeIdByName(emotion.IconType);
+        else dbEmotion.IconTypeId = 1;
 
         await db.SaveChangesAsync();
     }
@@ -131,7 +132,9 @@ public class JournalDbService : IJournalDbService
         }
 
         if (activity.Deleted != null) dbActivity.Deleted = activity.Deleted.Value;
-        if (activity.IconType != null) dbActivity.IconTypeId = await GetIconTypeIdByName(activity.IconType);
+        if (!string.IsNullOrEmpty(activity.IconType))
+            dbActivity.IconTypeId = await GetIconTypeIdByName(activity.IconType);
+        else dbActivity.IconTypeId = 1;
         if (activity.Name != null) dbActivity.Name = activity.Name;
         if (activity.Order != null) dbActivity.Order = activity.Order.Value;
         if (activity.Icon != null) dbActivity.Icon = activity.Icon;
