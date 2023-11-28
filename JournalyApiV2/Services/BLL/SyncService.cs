@@ -14,7 +14,7 @@ public class SyncService : ISyncService
         _syncDbService = syncDbService;
     }
 
-    public async Task<SyncMedResponse> GetUnsyncedMedData(Guid userGuid, Guid deviceGuid)
+    public async Task<SyncMedResponse> GetUnsyncedMedData(Guid userGuid, Guid deviceGuid, int size)
     {
         var medsTask = Task.Run(() => _syncDbService.GetUnsyncedMedications(userGuid, deviceGuid));
         var schedulesTask = Task.Run(() => _syncDbService.GetUnsyncedSchedules(userGuid, deviceGuid));
@@ -59,7 +59,7 @@ public class SyncService : ISyncService
         };
     }
     
-    public async Task<SyncJournalResponse> GetUnsyncedJournalData(Guid userGuid, Guid deviceGuid)
+    public async Task<SyncJournalResponse> GetUnsyncedJournalData(Guid userGuid, Guid deviceGuid, int size)
     {
         var journalEntriesTask = Task.Run(() => _syncDbService.GetUnsyncedJournalEntries(userGuid, deviceGuid));
         var emotionsTask = Task.Run(() => _syncDbService.GetUnsyncedEmotions(userGuid, deviceGuid));
@@ -68,10 +68,13 @@ public class SyncService : ISyncService
 
         await Task.WhenAll(journalEntriesTask, emotionsTask, activitiesTask, emotionCategoriesTask);
 
-        var journalEntries = journalEntriesTask.Result;
-        var emotions = emotionsTask.Result;
-        var activities = activitiesTask.Result;
-        var emotionCategories = emotionCategoriesTask.Result;
+        var journalEntries = journalEntriesTask.Result.Take(size).ToArray();
+        var emotions = emotionsTask.Result.Take(size).ToArray();
+        var activities = activitiesTask.Result.Take(size).ToArray();
+        var emotionCategories = emotionCategoriesTask.Result.Take(size).ToArray();
+
+        var totalRecords = journalEntriesTask.Result.Length + emotionsTask.Result.Length +
+                           activitiesTask.Result.Length + emotionCategoriesTask.Result.Length;
 
         var journalEntryRecordSyncs = journalEntries.Select(x => new RecordSync
         {
@@ -106,7 +109,8 @@ public class SyncService : ISyncService
             JournalEntries = journalEntries,
             Emotions = emotions,
             Activities = activities,
-            EmotionCategories = emotionCategories 
+            EmotionCategories = emotionCategories,
+            Remaining = totalRecords - (journalEntries.Length + emotions.Length + activities.Length + emotionCategories.Length)
         };
     }
 }

@@ -18,4 +18,10 @@ public class MedService : IMedService
         await _medDbService.SyncSchedules(request.Schedules, owner, deviceId);
         await _medDbService.SyncMedInstances(request.MedInstances, owner, deviceId);
     }
+
+    public async Task ClearMeds(Guid user)
+    {
+        await _medDbService.ClearMedsAsync(user);
+    }
+
 }

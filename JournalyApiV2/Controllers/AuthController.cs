@@ -240,4 +240,5 @@ public class AuthController : JournalyControllerBase
 
         return StatusCode(204);
     }
+    
 }

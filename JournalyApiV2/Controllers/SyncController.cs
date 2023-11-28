@@ -1,4 +1,5 @@
-﻿using JournalyApiV2.Services.BLL;
+﻿using System.Drawing;
+using JournalyApiV2.Services.BLL;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JournalyApiV2.Controllers;
@@ -16,15 +17,15 @@ public class SyncController : JournalyControllerBase
 
     [Route("journal")]
     [HttpGet]
-    public async Task<JsonResult> SyncJournal()
+    public async Task<JsonResult> SyncJournal([FromQuery] int size)
     {
-        return new JsonResult(await _syncService.GetUnsyncedJournalData(GetUserId(), GetDeviceId()));
+        return new JsonResult(await _syncService.GetUnsyncedJournalData(GetUserId(), GetDeviceId(), size));
     }
 
     [Route("med")]
     [HttpGet]
-    public async Task<JsonResult> SyncMeds()
+    public async Task<JsonResult> SyncMeds([FromQuery] int size)
     {
-        return new JsonResult(await _syncService.GetUnsyncedMedData(GetUserId(), GetDeviceId()));
+        return new JsonResult(await _syncService.GetUnsyncedMedData(GetUserId(), GetDeviceId(), size));
     }
 }
