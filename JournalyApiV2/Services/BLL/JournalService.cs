@@ -25,4 +25,9 @@ public class JournalService : IJournalService
             await _journalDbService.SyncJournalEntries(request.JournalEntries, owner,
                 deviceId); // Must come last due to database constraints
     }
+
+    public async Task ClearJournal(Guid user)
+    {
+        await _journalDbService.ClearJournalAsync(user);
+    }
 }

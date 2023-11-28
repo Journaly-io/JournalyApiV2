@@ -277,7 +277,30 @@ public class JournalDbService : IJournalDbService
         await db.SaveChangesAsync();
     }
 
+    public async Task ClearJournalAsync(Guid user)
+    {
+        await using var db = _db.Journaly();
 
+        var journalEntriesToRemove = db.JournalEntries.Where(x => x.Owner == user);
+        db.JournalEntries.RemoveRange(journalEntriesToRemove);
+
+        var activitiesToRemove = db.Activities.Where(x => x.Owner == user);
+        db.Activities.RemoveRange(activitiesToRemove);
+
+        var emotionsToRemove = db.Emotions.Where(x => x.Owner == user);
+        db.Emotions.RemoveRange(emotionsToRemove);
+
+        var categoriesToRemove = db.EmotionCategories.Where(x => x.Owner == user);
+        db.EmotionCategories.RemoveRange(categoriesToRemove);
+
+        var guids = journalEntriesToRemove.Select(x => x.Uuid).Concat(activitiesToRemove.Select(x => x.Uuid))
+            .Concat(emotionsToRemove.Select(x => x.Uuid)).Concat(categoriesToRemove.Select(x => x.Uuid));
+        var syncsToRemove = db.SyncedRecords.Where(x => guids.Contains(x.RecordId));
+        db.SyncedRecords.RemoveRange(syncsToRemove);
+
+        await db.SaveChangesAsync();
+    }
+    
     private async Task<short> GetIconTypeIdByName(string name)
     {
         await using var db = _db.Journaly();
