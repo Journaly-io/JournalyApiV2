@@ -6,11 +6,11 @@ namespace JournalyApiV2.Controllers;
 [Controller]
 public class AccountResetController : JournalyControllerBase
 {
-    private readonly IMedService _medService;
+    private readonly IAccountResetService _accountResetService;
 
-    public AccountResetController(IMedService medService)
+    public AccountResetController(IAccountResetService accountResetService)
     {
-        _medService = medService;
+        _accountResetService = accountResetService;
     }
 
     // This endpoint is for the local backup restore functionality. It clears the account data without deleting the account
@@ -18,8 +18,7 @@ public class AccountResetController : JournalyControllerBase
     [Route("/account-reset")]
     public async Task<IActionResult> AccountReset()
     {
-        await _medService.ClearMeds(GetUserId());
-
+        await _accountResetService.AccountResetAsync(GetUserId());
         return StatusCode(204);
     }
 }
