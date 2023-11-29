@@ -61,17 +61,40 @@ public class SyncService : ISyncService
     
     public async Task<SyncJournalResponse> GetUnsyncedJournalData(Guid userGuid, Guid deviceGuid, int size)
     {
+        var emotionCategoriesTask = Task.Run(() => _syncDbService.GetUnsyncedEmotionCategories(userGuid, deviceGuid));
         var journalEntriesTask = Task.Run(() => _syncDbService.GetUnsyncedJournalEntries(userGuid, deviceGuid));
         var emotionsTask = Task.Run(() => _syncDbService.GetUnsyncedEmotions(userGuid, deviceGuid));
         var activitiesTask = Task.Run(() => _syncDbService.GetUnsyncedActivities(userGuid, deviceGuid));
-        var emotionCategoriesTask = Task.Run(() => _syncDbService.GetUnsyncedEmotionCategories(userGuid, deviceGuid));
 
         await Task.WhenAll(journalEntriesTask, emotionsTask, activitiesTask, emotionCategoriesTask);
 
-        var journalEntries = journalEntriesTask.Result.Take(size).ToArray();
-        var emotions = emotionsTask.Result.Take(size).ToArray();
-        var activities = activitiesTask.Result.Take(size).ToArray();
-        var emotionCategories = emotionCategoriesTask.Result.Take(size).ToArray();
+        EmotionCategory[] emotionCategories;
+        Emotion[] emotions;
+        Activity[] activities;
+        JournalEntry[] journalEntries;
+        if (size == 0)
+        {
+            emotionCategories = emotionCategoriesTask.Result;
+            emotions = emotionsTask.Result;
+            activities = activitiesTask.Result;
+            journalEntries = journalEntriesTask.Result;
+        }
+        else
+        {
+            var count = size;
+           
+            emotionCategories = emotionCategoriesTask.Result.Take(count).ToArray();
+            count -= emotionCategories.Length;
+            
+            emotions = emotionsTask.Result.Take(count).ToArray();
+            count -= emotions.Length;
+            
+            activities = activitiesTask.Result.Take(size).ToArray();
+            count -= activities.Length;
+            
+            journalEntries = journalEntriesTask.Result.Take(count).ToArray();
+        }
+
 
         var totalRecords = journalEntriesTask.Result.Length + emotionsTask.Result.Length +
                            activitiesTask.Result.Length + emotionCategoriesTask.Result.Length;
