@@ -1,7 +1,13 @@
-﻿using JournalyApiV2.Data.Enums;
+﻿using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
 using JournalyApiV2.Models.Responses;
 using JournalyApiV2.Services.DAL;
+using Activity = JournalyApiV2.Models.Activity;
+using Emotion = JournalyApiV2.Models.Emotion;
+using EmotionCategory = JournalyApiV2.Models.EmotionCategory;
+using JournalEntry = JournalyApiV2.Models.JournalEntry;
+using Medication = JournalyApiV2.Models.Medication;
+using RecordType = JournalyApiV2.Data.Enums.RecordType;
 
 namespace JournalyApiV2.Services.BLL;
 
@@ -22,9 +28,28 @@ public class SyncService : ISyncService
 
         await Task.WhenAll(medsTask, schedulesTask, instancesTask);
 
-        var meds = medsTask.Result;
-        var schedules = schedulesTask.Result;
-        var instances = instancesTask.Result;
+        Medication[] meds;
+        Schedule[] schedules;
+        MedInstance[] instances;
+        
+        if (size == 0)
+        {
+            meds = medsTask.Result;
+            schedules = schedulesTask.Result;
+            instances = instancesTask.Result;
+        }
+        else
+        {
+            var count = size;
+            
+            meds = medsTask.Result.Take(count).ToArray();
+            count -= meds.Length;
+
+            schedules = schedulesTask.Result.Take(count).ToArray();
+            count -= schedules.Length;
+
+            instances = instancesTask.Result.Take(count).ToArray();
+        }
 
         var medSyncs = meds.Select(x => new RecordSync
         {
@@ -49,13 +74,16 @@ public class SyncService : ISyncService
 
         var recordSyncs = medSyncs.Concat(scheduleSyncs).Concat(instanceSyncs).ToArray();
 
+        var totalRecords = medsTask.Result.Length + schedulesTask.Result.Length + instancesTask.Result.Length;
+        
         await _syncDbService.MarkSynced(recordSyncs);
 
         return new SyncMedResponse
         {
             Medications = meds,
             Schedules = schedules,
-            MedInstances = instances
+            MedInstances = instances,
+            Remaining = totalRecords - (meds.Length + schedules.Length + instances.Length)
         };
     }
     
