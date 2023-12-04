@@ -25,11 +25,6 @@ public class SyncDbService : ISyncDbService
         }
         await using var db = _db.Journaly();
 
-        var existingRecords =
-            await db.SyncedRecords.Where(x => recordSyncs.Select(y => y.RecordId).Contains(x.RecordId) && !x.IsVoid && x.DeviceId == recordSyncs[0].DeviceId).ToListAsync();
-        
-        existingRecords.ForEach(x => x.IsVoid = true); // Void existing records
-
         await db.SyncedRecords.AddRangeAsync(recordSyncs.Select(x => new SyncedRecords
         {
             DeviceId = x.DeviceId,
