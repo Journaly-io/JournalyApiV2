@@ -19,10 +19,14 @@ public class SyncDbService : ISyncDbService
 
     public async Task MarkSynced(params RecordSync[] recordSyncs)
     {
+        if (recordSyncs.Select(x => x.DeviceId).Distinct().Skip(1).Any())
+        {
+            throw new Exception("Multiple device IDs within the same sync operation is currently not supported");
+        }
         await using var db = _db.Journaly();
 
         var existingRecords =
-            await db.SyncedRecords.Where(x => recordSyncs.Select(y => y.RecordId).Contains(x.RecordId) && !x.IsVoid).ToListAsync();
+            await db.SyncedRecords.Where(x => recordSyncs.Select(y => y.RecordId).Contains(x.RecordId) && !x.IsVoid && x.DeviceId == recordSyncs[0].DeviceId).ToListAsync();
         
         existingRecords.ForEach(x => x.IsVoid = true); // Void existing records
 
