@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -13,7 +12,6 @@ using JournalyApiV2.Models.Responses;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.DAL;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
 
 namespace JournalyApiV2.Services.BLL;
 
@@ -24,6 +22,7 @@ public class AuthService : IAuthService
     private readonly SignInManager<JournalyUser> _signInManager;
     private readonly IAuthDbService _authDbService;
     private readonly IEmailService _emailService;
+    private readonly ITokenDbService _tokenDbService;
     public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager, IAuthDbService authDbService, IEmailService emailService)
     {
         _userManager = userManager;
@@ -31,34 +30,6 @@ public class AuthService : IAuthService
         _signInManager = signInManager;
         _authDbService = authDbService;
         _emailService = emailService;
-    }
-
-    private string GenerateJwtToken(string userId, string email, string givenName, string familyName, int tokenId, bool verified)
-    {
-        var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, userId),
-            new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.GivenName, givenName),
-            new Claim(JwtRegisteredClaimNames.FamilyName, familyName),
-            new Claim("token_id", tokenId.ToString()),
-            new Claim("email_verified", verified ? "true" : "false")
-        };
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Identity:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expires = DateTime.Now.AddSeconds(Convert.ToDouble(_config["Identity:ExpireSeconds"]));
-
-        var token = new JwtSecurityToken(
-            _config["Identity:Issuer"],
-            _config["Identity:Audience"],
-            claims,
-            expires: expires,
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
     public async Task<AuthenticationResponse> SignIn(string email, string password)
@@ -71,12 +42,10 @@ public class AuthService : IAuthService
         var result = await _signInManager.PasswordSignInAsync(user.UserName, password, false, false);
         if (result.Succeeded)
         {
-            var refreshToken = await _authDbService.NewRefreshTokenAsync(Guid.Parse(user.Id));
+            var token = await _tokenDbService.GenerateToken(Guid.Parse(user.Id));
             return new AuthenticationResponse
             {
-                Token = GenerateJwtToken(user.Id, email, user.FirstName, user.LastName, refreshToken.TokenId, user.EmailConfirmed),
-                ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-                RefreshToken = refreshToken.Token
+                Token = token,
             };
         }
         else
