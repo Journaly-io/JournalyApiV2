@@ -189,10 +189,10 @@ public class AuthDbService : IAuthDbService
         }
     }
     
-    public async Task RevokeTokens(string[] tokens)
+    public async Task RevokeTokens(Guid userGuid)
     { 
         await using var db = _db.Journaly();
-        var userTokens = await db.UserTokenStore.Where(t => tokens.Contains(t.Token)).ToListAsync();
+        var userTokens = await db.UserTokenStore.Where(t => userGuid == t.UserId).ToListAsync();
         if (userTokens.Count > 0)
         {
             db.UserTokenStore.RemoveRange(userTokens);

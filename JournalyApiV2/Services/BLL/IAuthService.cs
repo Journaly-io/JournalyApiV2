@@ -8,7 +8,7 @@ public interface IAuthService
     Task<AuthenticationResponse> SignIn(string email, string password);
     Task VoidToken(string token);
     Task ChangeName(string firstName, string lastName, Guid userId);
-    Task ChangeEmail(string email, Guid userId, int tokenId);
+    Task ChangeEmail(string email, Guid userId);
     Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId, bool signOutEverywhere = true);
     Task VerifyEmail(Guid userId, string toEmail, string firstName, string lastName);
     Task VerifyEmailWithLongCode(string longCode);
@@ -16,5 +16,5 @@ public interface IAuthService
     Task ResendVerificationEmailAsync(Guid userId);
     Task ResetPasswordAsync(string email);
     Task SubmitPasswordResetAsync(string code, string password, bool signOutEverywhere = true);
-    Task SignOutEverywhereAsync(Guid userId, int? tokenId);
+    Task SignOutEverywhereAsync(Guid userId);
 }

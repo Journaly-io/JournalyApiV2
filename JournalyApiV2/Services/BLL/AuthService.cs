@@ -77,7 +77,7 @@ public class AuthService : IAuthService
         await VerifyEmail(Guid.Parse(newUser.Id), newUser.Email, newUser.FirstName, newUser.LastName);
     }
 
-    public async Task ChangeName(string firstName, string lastName, Guid userId, int tokenId)
+    public async Task ChangeName(string firstName, string lastName, Guid userId)
     {
         // Change name
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -110,7 +110,7 @@ public class AuthService : IAuthService
 
         if (signOutEverywhere)
         {
-            await SignOutEverywhereAsync(userId, tokenId);
+            await SignOutEverywhereAsync(userId);
         }
     }
 
