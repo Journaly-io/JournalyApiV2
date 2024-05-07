@@ -571,29 +571,6 @@ namespace JournalyApiV2.Data.Migrations
                     b.ToTable("RecordType");
                 });
 
-            modelBuilder.Entity("JournalyApiV2.Data.Models.RefreshToken", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("Token");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("UserId");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RefreshToken");
-                });
-
             modelBuilder.Entity("JournalyApiV2.Data.Models.SyncedRecords", b =>
                 {
                     b.Property<int>("Id")
@@ -629,6 +606,25 @@ namespace JournalyApiV2.Data.Migrations
                     b.HasIndex("RecordTypeId");
 
                     b.ToTable("SyncedRecords");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.UserToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Token");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserToken");
                 });
 
             modelBuilder.Entity("JournalyApiV2.Models.JournalyUser", b =>
