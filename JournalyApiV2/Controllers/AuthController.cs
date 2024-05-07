@@ -85,13 +85,10 @@ public class AuthController : JournalyControllerBase
 
     [Route("change-email")]
     [HttpPost]
-    public async Task<JsonResult> ChangeEmail([FromBody] ChangeEmailRequest request)
+    public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequest request)
     {
-        var tokenId = User.FindFirst("token_id");
-        if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
-        var result =
-            await _authService.ChangeEmail(request.Email, GetUserId(), int.Parse(tokenId.Value));
-        return new JsonResult(result);
+        await _authService.ChangeEmail(request.Email, GetUserId());
+        return StatusCode(204);
     }
 
     [Route("change-password")]
@@ -217,7 +214,7 @@ public class AuthController : JournalyControllerBase
     {
         var tokenId = User.FindFirst("token_id");
         if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
-        await _authService.SignOutEverywhereAsync(GetUserId(), Convert.ToInt32(tokenId.Value));
+        await _authService.SignOutEverywhereAsync(GetUserId());
 
         return StatusCode(204);
     }
