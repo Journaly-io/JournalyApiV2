@@ -16,4 +16,5 @@ public interface IAuthDbService
     Task<string> GenerateToken(Guid userId);
     Task<Guid?> ValidateToken(string token);
     Task RevokeToken(string token);
+    Task<EmailVerification> GetOrCreateEmailVerificationCode(Guid userId);
 }

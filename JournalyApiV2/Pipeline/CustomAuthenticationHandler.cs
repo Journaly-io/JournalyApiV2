@@ -8,17 +8,17 @@ namespace JournalyApiV2.Pipeline;
 
 public class CustomAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    private readonly ITokenDbService _tokenDbService;
+    private readonly IAuthDbService _tokenDbService;
 
     public CustomAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
         ISystemClock clock,
-        ITokenDbService tokenService)
+        IAuthDbService authDbService)
         : base(options, logger, encoder, clock)
     {
-        _tokenDbService = tokenService;
+        _tokenDbService = authDbService;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()

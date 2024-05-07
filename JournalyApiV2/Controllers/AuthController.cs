@@ -63,8 +63,8 @@ public class AuthController : JournalyControllerBase
     {
         try
         {
-            var tokenId = User.FindFirst("token_id");
-            if (tokenId != null) await _authService.VoidToken(Convert.ToInt32(tokenId.Value));
+            var token = User.FindFirst("token");
+            if (token != null) await _authService.VoidToken(token.Value);
         }
         catch (ArgumentException)
         {
