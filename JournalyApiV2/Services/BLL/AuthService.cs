@@ -87,7 +87,7 @@ public class AuthService : IAuthService
         await _userManager.UpdateAsync(user);
     }
 
-    public async Task ChangeEmail(string email, Guid userId, int tokenId)
+    public async Task ChangeEmail(string email, Guid userId)
     {
         // change email
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -195,14 +195,13 @@ public class AuthService : IAuthService
         
         if (signOutEverywhere)
         {
-            await SignOutEverywhereAsync(userGuid.Value, null);
+            await SignOutEverywhereAsync(userGuid.Value);
         }
     }
 
-    public async Task SignOutEverywhereAsync(Guid userId, int? tokenId)
+    public async Task SignOutEverywhereAsync(Guid userId)
     {
-        var existingRefreshTokens = await (userId);
-        await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Where(x => x.TokenId != tokenId).Select(x => x.TokenId).ToArray());   
+        await _authDbService.RevokeTokens(userId);   
     }
     
 }

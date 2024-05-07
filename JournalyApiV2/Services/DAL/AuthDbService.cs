@@ -188,4 +188,15 @@ public class AuthDbService : IAuthDbService
             await db.SaveChangesAsync();
         }
     }
+    
+    public async Task RevokeTokens(string[] tokens)
+    { 
+        await using var db = _db.Journaly();
+        var userTokens = await db.UserTokenStore.Where(t => tokens.Contains(t.Token)).ToListAsync();
+        if (userTokens.Count > 0)
+        {
+            db.UserTokenStore.RemoveRange(userTokens);
+            await db.SaveChangesAsync();
+        }
+    }
 }
