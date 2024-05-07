@@ -74,32 +74,13 @@ public class AuthController : JournalyControllerBase
         return Ok();
     }
 
-    
-    [Route("refresh-token")]
-    [HttpPost]
-    [AllowAnonymous]
-    public async Task<JsonResult> RefreshToken([FromBody] string token)
-    {
-        try
-        {
-            var result = await _authService.RefreshToken(token);
-            return new JsonResult(result);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new HttpBadRequestException(ex.Message);
-        }
-    }
-
     [Route("change-name")]
     [HttpPost]
-    public async Task<JsonResult> ChangeName([FromBody] ChangeNameRequest request)
+    public async Task<IActionResult> ChangeName([FromBody] ChangeNameRequest request)
     {
         var tokenId = User.FindFirst("token_id");
         if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
-        var result =
-            await _authService.ChangeName(request.FirstName, request.LastName, GetUserId(), int.Parse(tokenId.Value));
-        return new JsonResult(result);
+        return StatusCode(204);
     }
 
     [Route("change-email")]

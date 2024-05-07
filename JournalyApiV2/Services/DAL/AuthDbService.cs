@@ -154,4 +154,38 @@ public class AuthDbService : IAuthDbService
         db.RemoveRange(toRemove);
         await db.SaveChangesAsync();
     }
+    
+    public async Task<string> GenerateToken(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        using var randomNumberGenerator = RandomNumberGenerator.Create();
+        var randomNumber = new byte[32];
+        randomNumberGenerator.GetBytes(randomNumber);
+        var token = Convert.ToBase64String(randomNumber);
+        db.UserTokenStore.Add(new UserToken
+        {
+            Token = token,
+            UserId = userId,
+        });
+        await db.SaveChangesAsync();
+        return token;
+    }
+
+    public async Task<Guid?> ValidateToken(string token)
+    {
+        await using var db = _db.Journaly();
+        var userToken = db.UserTokenStore.FirstOrDefault(t => t.Token == token);
+        return userToken?.UserId;
+    }
+
+    public async Task RevokeToken(string token)
+    {
+        await using var db = _db.Journaly();
+        var userToken = db.UserTokenStore.FirstOrDefault(t => t.Token == token);
+        if (userToken != null)
+        {
+            db.UserTokenStore.Remove(userToken);
+            await db.SaveChangesAsync();
+        }
+    }
 }

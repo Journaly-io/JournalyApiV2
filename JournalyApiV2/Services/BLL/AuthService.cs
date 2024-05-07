@@ -22,7 +22,6 @@ public class AuthService : IAuthService
     private readonly SignInManager<JournalyUser> _signInManager;
     private readonly IAuthDbService _authDbService;
     private readonly IEmailService _emailService;
-    private readonly ITokenDbService _tokenDbService;
     public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager, IAuthDbService authDbService, IEmailService emailService)
     {
         _userManager = userManager;
@@ -42,7 +41,7 @@ public class AuthService : IAuthService
         var result = await _signInManager.PasswordSignInAsync(user.UserName, password, false, false);
         if (result.Succeeded)
         {
-            var token = await _tokenDbService.GenerateToken(Guid.Parse(user.Id));
+            var token = await _authDbService.GenerateToken(Guid.Parse(user.Id));
             return new AuthenticationResponse
             {
                 Token = token,
@@ -54,9 +53,9 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task VoidToken(int tokenId)
+    public async Task VoidToken(string token)
     {
-        await _authDbService.VoidRefreshTokensAsync(tokenId);
+        await _authDbService.RevokeToken(token);
     }
     
     public async Task CreateUser(string email, string password, string firstName, string lastName)
@@ -78,27 +77,7 @@ public class AuthService : IAuthService
         await VerifyEmail(Guid.Parse(newUser.Id), newUser.Email, newUser.FirstName, newUser.LastName);
     }
 
-    public async Task<AuthenticationResponse> RefreshToken(string refreshToken)
-    {
-        var owner = await _authDbService.LookupRefreshTokenAsync(refreshToken);
-        if (owner == null)
-        {
-            throw new ArgumentException("Refresh token not valid");
-        }
-
-        var user = await _userManager.FindByIdAsync(owner.Value.ToString());
-        if (user == null) throw new Exception("Refresh token is valid, but couldn't find user");
-        var newToken = await _authDbService.ExchangeRefreshTokenAsync(refreshToken);
-        if (newToken == null) throw new Exception("Failed to refresh token");
-        return new AuthenticationResponse
-        {
-            RefreshToken = newToken.Token,
-            ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-            Token = GenerateJwtToken(user.Id, user.Email, user.FirstName, user.LastName, newToken.TokenId, user.EmailConfirmed)
-        };
-    }
-
-    public async Task<AuthenticationResponse> ChangeName(string firstName, string lastName, Guid userId, int tokenId)
+    public async Task ChangeName(string firstName, string lastName, Guid userId, int tokenId)
     {
         // Change name
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -106,21 +85,9 @@ public class AuthService : IAuthService
         user.FirstName = firstName;
         user.LastName = lastName;
         await _userManager.UpdateAsync(user);
-        
-        // Generate new JWT and associated refresh token with the name updated
-        await _authDbService.VoidRefreshTokensAsync(tokenId);
-        var refreshToken = await _authDbService.NewRefreshTokenAsync(userId);
-        var accessToken = GenerateJwtToken(userId.ToString(), user.Email, firstName, lastName, refreshToken.TokenId, user.EmailConfirmed);
-        
-        return new AuthenticationResponse
-        {
-            ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-            RefreshToken = refreshToken.Token,
-            Token = accessToken
-        };
     }
 
-    public async Task<AuthenticationResponse> ChangeEmail(string email, Guid userId, int tokenId)
+    public async Task ChangeEmail(string email, Guid userId, int tokenId)
     {
         // change email
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -128,18 +95,6 @@ public class AuthService : IAuthService
         user.Email = email;
         user.UserName = email;
         await _userManager.UpdateAsync(user);
-        
-        // Generate new JWT and associated refresh token with the name updated
-        await _authDbService.VoidRefreshTokensAsync(tokenId);
-        var refreshToken = await _authDbService.NewRefreshTokenAsync(userId);
-        var accessToken = GenerateJwtToken(userId.ToString(), email, user.FirstName, user.LastName, refreshToken.TokenId, user.EmailConfirmed);
-        
-        return new AuthenticationResponse
-        {
-            ExpiresIn = _config.GetValue<int>("Identity:ExpireSeconds"),
-            RefreshToken = refreshToken.Token,
-            Token = accessToken
-        };
     }
 
     public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId, bool signOutEverywhere = true)
@@ -246,7 +201,7 @@ public class AuthService : IAuthService
 
     public async Task SignOutEverywhereAsync(Guid userId, int? tokenId)
     {
-        var existingRefreshTokens = await _authDbService.GetRefreshTokensAsync(userId);
+        var existingRefreshTokens = await (userId);
         await _authDbService.VoidRefreshTokensAsync(existingRefreshTokens.Where(x => x.TokenId != tokenId).Select(x => x.TokenId).ToArray());   
     }
     
