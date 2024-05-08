@@ -222,6 +222,9 @@ public class AuthController : JournalyControllerBase
     }
 
     [Route("userinfo")]
+    // This is to bypass the email-confirmed policy
+    [AllowAnonymous]
+    [Authorize]
     [HttpGet]
     public async Task<JsonResult> UserInfo()
     {
