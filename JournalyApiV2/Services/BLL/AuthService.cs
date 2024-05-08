@@ -97,7 +97,7 @@ public class AuthService : IAuthService
         await _userManager.UpdateAsync(user);
     }
 
-    public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId, bool signOutEverywhere = true)
+    public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, bool signOutEverywhere = true)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null) throw new ArgumentException("User not found");
