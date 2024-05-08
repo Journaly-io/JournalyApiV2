@@ -622,6 +622,10 @@ namespace JournalyApiV2.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("Token");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("UserId");
+
                     b.HasKey("Id");
 
                     b.ToTable("UserToken");

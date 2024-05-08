@@ -15,5 +15,5 @@ public class UserToken
     public string Token { get; set; }
 
     [Column("UserId")]
-    public Guid UserId;
+    public Guid UserId { get; set; }
 }

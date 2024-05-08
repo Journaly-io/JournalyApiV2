@@ -28,7 +28,7 @@ public class CustomAuthenticationHandler : AuthenticationHandler<AuthenticationS
             return AuthenticateResult.Fail("No token provided.");
         }
 
-        var userId = await _tokenDbService.ValidateToken(token);
+        var userId = await _tokenDbService.ValidateToken(token.ToString().Replace("Bearer ", ""));
         if (userId != null)
         {
             var claims = new[] { new Claim(ClaimTypes.NameIdentifier, userId.Value.ToString()) };

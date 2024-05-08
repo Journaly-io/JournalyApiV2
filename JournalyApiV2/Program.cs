@@ -64,8 +64,10 @@ builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
     })
     .AddEntityFrameworkStores<JournalyDbContext>();
 
-builder.Services.AddAuthentication(@"CustomScheme").AddScheme<AuthenticationSchemeOptions, CustomAuthenticationHandler>("CustomScheme", options => { });;
-
+builder.Services.AddAuthentication(options => {
+    options.DefaultAuthenticateScheme = "CustomScheme";
+    options.DefaultChallengeScheme = "CustomScheme";
+}).AddScheme<AuthenticationSchemeOptions, CustomAuthenticationHandler>("CustomScheme", options => {});
 
 
 
