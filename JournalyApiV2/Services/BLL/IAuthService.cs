@@ -9,7 +9,7 @@ public interface IAuthService
     Task VoidToken(string token);
     Task ChangeName(string firstName, string lastName, Guid userId);
     Task ChangeEmail(string email, Guid userId);
-    Task ChangePassword(Guid userId, string oldPassword, string newPassword, int tokenId, bool signOutEverywhere = true);
+    Task ChangePassword(Guid userId, string oldPassword, string newPassword, bool signOutEverywhere = true);
     Task VerifyEmail(Guid userId, string toEmail, string firstName, string lastName);
     Task VerifyEmailWithLongCode(string longCode);
     Task VerifyEmailWithShortCode(Guid userId, string shortCode);

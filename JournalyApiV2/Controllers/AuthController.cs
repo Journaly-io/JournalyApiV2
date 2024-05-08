@@ -78,8 +78,6 @@ public class AuthController : JournalyControllerBase
     [HttpPost]
     public async Task<IActionResult> ChangeName([FromBody] ChangeNameRequest request)
     {
-        var tokenId = User.FindFirst("token_id");
-        if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
         return StatusCode(204);
     }
 
@@ -95,12 +93,9 @@ public class AuthController : JournalyControllerBase
     [HttpPost]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        var tokenId = User.FindFirst("token_id");
-        if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
         try
         {
-            await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword,
-                int.Parse(tokenId.Value), request.SignOutEverywhere);
+            await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword);
         }
         catch (ArgumentException)
         {
@@ -214,10 +209,7 @@ public class AuthController : JournalyControllerBase
     [HttpGet]
     public async Task<IActionResult> SignOutEverywhere()
     {
-        var tokenId = User.FindFirst("token_id");
-        if (tokenId == null) throw new HttpBadRequestException("Token has no identifier");
         await _authService.SignOutEverywhereAsync(GetUserId());
-
         return StatusCode(204);
     }
 
