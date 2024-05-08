@@ -78,6 +78,7 @@ public class AuthController : JournalyControllerBase
     [HttpPost]
     public async Task<IActionResult> ChangeName([FromBody] ChangeNameRequest request)
     {
+        await _authService.ChangeName(request.FirstName, request.LastName, GetUserId());
         return StatusCode(204);
     }
 
