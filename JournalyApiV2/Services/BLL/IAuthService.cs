@@ -17,4 +17,5 @@ public interface IAuthService
     Task ResetPasswordAsync(string email);
     Task SubmitPasswordResetAsync(string code, string password, bool signOutEverywhere = true);
     Task SignOutEverywhereAsync(Guid userId);
+    Task<UserInfoResponse> GetUserInfoAsync(Guid userId);
 }

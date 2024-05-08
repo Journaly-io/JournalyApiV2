@@ -203,5 +203,17 @@ public class AuthService : IAuthService
     {
         await _authDbService.RevokeTokens(userId);   
     }
-    
+
+    public async Task<UserInfoResponse> GetUserInfoAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        return new UserInfoResponse()
+        {
+            Email = user.Email,
+            EmailVerified = user.EmailConfirmed,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Uuid = userId
+        };
+    }
 }

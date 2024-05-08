@@ -55,7 +55,7 @@ public class AuthController : JournalyControllerBase
             throw new HttpBadRequestException(ex.Message);
         }
     }
-    
+
 
     [Route("sign-out")]
     [HttpGet]
@@ -189,9 +189,10 @@ public class AuthController : JournalyControllerBase
         {
             throw new HttpBadRequestException(ex.Message);
         }
+
         return StatusCode(204);
     }
-    
+
     [Route("submit-password-reset")]
     [HttpPost]
     [AllowAnonymous]
@@ -205,6 +206,7 @@ public class AuthController : JournalyControllerBase
         {
             throw new HttpBadRequestException(ex.Message);
         }
+
         return StatusCode(204);
     }
 
@@ -218,5 +220,12 @@ public class AuthController : JournalyControllerBase
 
         return StatusCode(204);
     }
-    
+
+    [Route("userinfo")]
+    [HttpGet]
+    public async Task<JsonResult> UserInfo()
+    {
+        var result = await _authService.GetUserInfoAsync(GetUserId());
+        return new JsonResult(result);
+    }
 }
