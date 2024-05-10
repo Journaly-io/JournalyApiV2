@@ -4,7 +4,8 @@ namespace JournalyApiV2.Services.BLL;
 
 public interface IAuthService
 {
-    Task CreateUser(string email, string password, string firstName, string lastName);
+    Task CreateUser(string email, string password, string firstName, string lastName, string encryptedDEK,
+        string KEKSalt);
     Task<AuthenticationResponse> SignIn(string email, string password);
     Task VoidToken(string token);
     Task ChangeName(string firstName, string lastName, Guid userId);

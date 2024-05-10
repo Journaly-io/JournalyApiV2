@@ -26,7 +26,7 @@ public class AuthController : JournalyControllerBase
     {
         try
         {
-            await _authService.CreateUser(request.Email, request.Password, request.FirstName, request.LastName);
+            await _authService.CreateUser(request.Email, request.Password, request.FirstName, request.LastName, request.EncryptedDEK, request.KEKSalt);
         }
         catch (ArgumentException ex)
         {

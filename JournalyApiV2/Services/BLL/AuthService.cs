@@ -58,7 +58,7 @@ public class AuthService : IAuthService
         await _authDbService.RevokeToken(token);
     }
     
-    public async Task CreateUser(string email, string password, string firstName, string lastName)
+    public async Task CreateUser(string email, string password, string firstName, string lastName, string encryptedDEK, string KEKSalt)
     {
         if (await _userManager.FindByEmailAsync(email) != null) throw new ArgumentException("Email already in use");
         var result = await _userManager.CreateAsync(new JournalyUser
@@ -66,7 +66,9 @@ public class AuthService : IAuthService
             FirstName = firstName,
             LastName = lastName,
             Email = email,
-            UserName = email
+            UserName = email,
+            EncryptedDEK = encryptedDEK,
+            KEKSalt = KEKSalt
         }, password);
         if (!result.Succeeded)
         {

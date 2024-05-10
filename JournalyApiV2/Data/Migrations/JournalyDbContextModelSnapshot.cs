@@ -650,7 +650,15 @@ namespace JournalyApiV2.Data.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("EncryptedDEK")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("KEKSalt")
                         .IsRequired()
                         .HasColumnType("text");
 
