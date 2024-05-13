@@ -29,21 +29,6 @@ public class EmailService : IEmailService
         await SendEmailAsync(toEmail, $"{firstName} {lastName}", msg);
     }
     
-    public async Task SendPasswordResetEmailAsync(string toEmail, string firstName, string lastName, string code)
-    {
-        var msg = new SendGridMessage();
-        msg.SetTemplateId(_config.GetValue<string>("SendGrid:Templates:PasswordReset"));
-        var url = new Uri("https://link.journaly.io/password").AddParameter("email", toEmail).AddParameter("code", code);
-        var data = new
-        {
-            name = firstName,
-            verificationLink = url
-        };
-        msg.SetTemplateData(data);
-
-        await SendEmailAsync(toEmail, $"{firstName} {lastName}", msg);
-    }
-    
     private async Task SendEmailAsync(string toEmail, string toName, SendGridMessage message)
     {
         var client = new SendGridClient(_config.GetValue<string>("SendGrid:ApiKey"));
