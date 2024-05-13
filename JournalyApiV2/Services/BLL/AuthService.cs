@@ -99,11 +99,14 @@ public class AuthService : IAuthService
         await _userManager.UpdateAsync(user);
     }
 
-    public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, bool signOutEverywhere = true)
+    public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, string encryptedDEK, string KEKSalt, bool signOutEverywhere = true)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null) throw new ArgumentException("User not found");
+        user.EncryptedDEK = encryptedDEK;
+        user.KEKSalt = KEKSalt;
         var result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+        await _userManager.UpdateAsync(user);
 
         if (!result.Succeeded)
         {
@@ -162,45 +165,6 @@ public class AuthService : IAuthService
         await VerifyEmail(userId, user.Email, user.FirstName, user.LastName);
     }
 
-    public async Task ResetPasswordAsync(string email)
-    {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null) throw new ArgumentException("User not found");
-        var code = await _authDbService.GetPasswordResetCode(Guid.Parse(user.Id));
-        if (code == null)
-        {
-            code = await _authDbService.GeneratePasswordResetCode(Guid.Parse(user.Id));
-        }
-        else
-        {
-            await _authDbService.ResetPasswordResetTimerAsync(Guid.Parse(user.Id));
-        }
-        await _emailService.SendPasswordResetEmailAsync(user.Email, user.FirstName, user.LastName, code);
-    }
-
-    public async Task SubmitPasswordResetAsync(string code, string password, bool signOutEverywhere)
-    {
-        var userGuid = await _authDbService.LookupPasswordResetAsync(code);
-        if (userGuid == null) throw new ArgumentException("Invalid password reset code");
-        var user = await _userManager.FindByIdAsync(userGuid.Value.ToString());
-        if (user == null) throw new Exception("User not found");
-        await _userManager.RemovePasswordAsync(user);
-        var result = await _userManager.AddPasswordAsync(user, password);
-        if (result.Succeeded)
-        {
-            await _authDbService.ResetPassword(userGuid.Value);
-        }
-        else
-        {
-            throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description).ToArray()));
-        }
-        
-        if (signOutEverywhere)
-        {
-            await SignOutEverywhereAsync(userGuid.Value);
-        }
-    }
-
     public async Task SignOutEverywhereAsync(Guid userId)
     {
         await _authDbService.RevokeTokens(userId);   
@@ -215,7 +179,17 @@ public class AuthService : IAuthService
             EmailVerified = user.EmailConfirmed,
             FirstName = user.FirstName,
             LastName = user.LastName,
-            Uuid = userId
+            Uuid = userId,
+            EncryptedDEK = user.EncryptedDEK,
+            KEKSalt = user.KEKSalt
         };
+    }
+
+    public async Task UpdateKEK(Guid userId, string wrappedDEK, string KEKSalt)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        user.EncryptedDEK = wrappedDEK;
+        user.KEKSalt = KEKSalt;
+        await _userManager.UpdateAsync(user);
     }
 }

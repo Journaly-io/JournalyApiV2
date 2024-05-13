@@ -91,12 +91,15 @@ public class AuthController : JournalyControllerBase
     }
 
     [Route("change-password")]
+    // This is to bypass the email-confirmed policy. This is in case the user makes an account and signs out before they verify their email and forget their password
+    [AllowAnonymous]
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         try
         {
-            await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword);
+            await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword, request.encryptedDEK, request.KEKSalt, request.SignOutEverywhere);
         }
         catch (ArgumentException)
         {
@@ -159,44 +162,6 @@ public class AuthController : JournalyControllerBase
         catch (TooEarlyException ex)
         {
             throw new HttpBadRequestException(ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            throw new HttpBadRequestException(ex.Message);
-        }
-
-        return StatusCode(204);
-    }
-
-    [Route("reset-password")]
-    [HttpPost]
-    [AllowAnonymous]
-    public async Task<IActionResult> ResetPassword([FromBody] string email)
-    {
-        try
-        {
-            await _authService.ResetPasswordAsync(email);
-        }
-        catch (ArgumentException)
-        {
-            // Ignore argumentException - this means the email was not found but we don't want the user to know that
-        }
-        catch (TooEarlyException ex)
-        {
-            throw new HttpBadRequestException(ex.Message);
-        }
-
-        return StatusCode(204);
-    }
-
-    [Route("submit-password-reset")]
-    [HttpPost]
-    [AllowAnonymous]
-    public async Task<IActionResult> SubmitPasswordReset([FromBody] ResetPasswordRequest request)
-    {
-        try
-        {
-            await _authService.SubmitPasswordResetAsync(request.Code, request.NewPassword, request.SignOutEverywhere);
         }
         catch (ArgumentException ex)
         {

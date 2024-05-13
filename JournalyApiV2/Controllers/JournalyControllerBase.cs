@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using JournalyApiV2.Pipeline;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -10,11 +11,18 @@ namespace JournalyApiV2.Controllers;
 public class JournalyControllerBase : ControllerBase
 {
     protected Guid GetUserId()
-    { 
-        return new Guid(
-            HttpContext.User.Claims
-                .Single(x => x.Type == ClaimTypes.NameIdentifier).Value
-        );
+    {
+        try
+        {
+            return new Guid(
+                HttpContext.User.Claims
+                    .Single(x => x.Type == ClaimTypes.NameIdentifier).Value
+            );
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new HttpAccessDeniedException("Getting user ID failed", ex);
+        }
     }
 
     protected Guid GetDeviceId()

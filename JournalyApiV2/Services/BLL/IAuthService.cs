@@ -10,13 +10,14 @@ public interface IAuthService
     Task VoidToken(string token);
     Task ChangeName(string firstName, string lastName, Guid userId);
     Task ChangeEmail(string email, Guid userId);
-    Task ChangePassword(Guid userId, string oldPassword, string newPassword, bool signOutEverywhere = true);
+
+    Task ChangePassword(Guid userId, string oldPassword, string newPassword, string encryptedDEK, string KEKSalt,
+        bool signOutEverywhere = true);
     Task VerifyEmail(Guid userId, string toEmail, string firstName, string lastName);
     Task VerifyEmailWithLongCode(string longCode);
     Task VerifyEmailWithShortCode(Guid userId, string shortCode);
     Task ResendVerificationEmailAsync(Guid userId);
-    Task ResetPasswordAsync(string email);
-    Task SubmitPasswordResetAsync(string code, string password, bool signOutEverywhere = true);
     Task SignOutEverywhereAsync(Guid userId);
     Task<UserInfoResponse> GetUserInfoAsync(Guid userId);
+    Task UpdateKEK(Guid userId, string wrappedDEK, string KEKSalt);
 }
