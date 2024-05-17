@@ -68,7 +68,8 @@ public class AuthService : IAuthService
             Email = email,
             UserName = email,
             EncryptedDEK = encryptedDEK,
-            KEKSalt = KEKSalt
+            KEKSalt = KEKSalt,
+            EmailConfirmed = email.EndsWith(".test")
         }, password);
         if (!result.Succeeded)
         {
@@ -76,7 +77,7 @@ public class AuthService : IAuthService
         }
 
         var newUser = await _userManager.FindByEmailAsync(email);
-        await VerifyEmail(Guid.Parse(newUser.Id), newUser.Email, newUser.FirstName, newUser.LastName);
+        if (email.EndsWith(".test")) await VerifyEmail(Guid.Parse(newUser.Id), newUser.Email, newUser.FirstName, newUser.LastName);
     }
 
     public async Task ChangeName(string firstName, string lastName, Guid userId)
