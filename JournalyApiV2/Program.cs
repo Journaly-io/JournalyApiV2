@@ -55,11 +55,12 @@ builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
         options.User.RequireUniqueEmail = true;
         options.User.AllowedUserNameCharacters = 
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-        options.Password.RequireDigit = true;
-        options.Password.RequireLowercase = true;
+        // Disable password requirements since the password will be pre-hashed anyway
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
         options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = true;
-        options.Password.RequiredLength = 6;
+        options.Password.RequireUppercase = false;
+        options.Password.RequiredLength = 1;
         options.Password.RequiredUniqueChars = 1;
     })
     .AddEntityFrameworkStores<JournalyDbContext>();
