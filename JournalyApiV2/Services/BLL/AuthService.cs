@@ -90,7 +90,7 @@ public class AuthService : IAuthService
         await _userManager.UpdateAsync(user);
     }
 
-    public async Task ChangeEmail(string email, Guid userId)
+    public async Task ChangeEmail(string email, string passwordHash, Guid userId)
     {
         // change email
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -98,6 +98,8 @@ public class AuthService : IAuthService
         user.Email = email;
         user.UserName = email;
         await _userManager.UpdateAsync(user);
+        var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        await _userManager.ResetPasswordAsync(user, resetToken, passwordHash);
     }
 
     public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, string encryptedDEK, string KEKSalt, bool signOutEverywhere = true)
