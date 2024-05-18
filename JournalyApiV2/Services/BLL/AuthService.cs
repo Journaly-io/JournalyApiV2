@@ -102,7 +102,7 @@ public class AuthService : IAuthService
         await _userManager.ResetPasswordAsync(user, resetToken, passwordHash);
     }
 
-    public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, string encryptedDEK, string KEKSalt, bool signOutEverywhere = true)
+    public async Task ChangePassword(Guid userId, string oldPassword, string newPassword, string encryptedDEK, string KEKSalt, string initiatorToken, bool signOutEverywhere = true)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null) throw new ArgumentException("User not found");
@@ -118,7 +118,7 @@ public class AuthService : IAuthService
 
         if (signOutEverywhere)
         {
-            await SignOutEverywhereAsync(userId);
+            await SignOutEverywhereAsync(userId, initiatorToken);
         }
     }
 
@@ -168,9 +168,9 @@ public class AuthService : IAuthService
         await VerifyEmail(userId, user.Email, user.FirstName, user.LastName);
     }
 
-    public async Task SignOutEverywhereAsync(Guid userId)
+    public async Task SignOutEverywhereAsync(Guid userId, string initiatorToken)
     {
-        await _authDbService.RevokeTokens(userId);   
+        await _authDbService.RevokeTokens(userId, new []{initiatorToken});   
     }
 
     public async Task<UserInfoResponse> GetUserInfoAsync(Guid userId)

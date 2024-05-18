@@ -5,6 +5,7 @@ using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace JournalyApiV2.Controllers;
 
@@ -99,7 +100,7 @@ public class AuthController : JournalyControllerBase
     {
         try
         {
-            await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword, request.encryptedDEK, request.KEKSalt, request.SignOutEverywhere);
+            await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword, request.encryptedDEK, request.KEKSalt, Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", ""), request.SignOutEverywhere);
         }
         catch (ArgumentException)
         {
@@ -175,7 +176,7 @@ public class AuthController : JournalyControllerBase
     [HttpGet]
     public async Task<IActionResult> SignOutEverywhere()
     {
-        await _authService.SignOutEverywhereAsync(GetUserId());
+        await _authService.SignOutEverywhereAsync(GetUserId(), Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", ""));
         return StatusCode(204);
     }
 
