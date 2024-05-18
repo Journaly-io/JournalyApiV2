@@ -63,7 +63,8 @@ builder.Services.AddIdentity<JournalyUser, IdentityRole>(options =>
         options.Password.RequiredLength = 1;
         options.Password.RequiredUniqueChars = 1;
     })
-    .AddEntityFrameworkStores<JournalyDbContext>();
+    .AddEntityFrameworkStores<JournalyDbContext>()
+    .AddTokenProvider<DataProtectorTokenProvider<JournalyUser>>(TokenOptions.DefaultProvider);;
 
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = "CustomScheme";
