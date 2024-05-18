@@ -9,7 +9,7 @@ public interface IAuthService
     Task<AuthenticationResponse> SignIn(string email, string password);
     Task VoidToken(string token);
     Task ChangeName(string firstName, string lastName, Guid userId);
-    Task ChangeEmail(string email, string KEKSalt, string encryptedDEK, Guid userId);   
+    Task ChangeEmail(string email, Guid userId);
 
     Task ChangePassword(Guid userId, string oldPassword, string newPassword, string encryptedDEK, string KEKSalt,
         bool signOutEverywhere = true);
