@@ -90,13 +90,15 @@ public class AuthService : IAuthService
         await _userManager.UpdateAsync(user);
     }
 
-    public async Task ChangeEmail(string email, Guid userId)
+    public async Task ChangeEmail(string email, string KEKSalt, string encryptedDEK, Guid userId)
     {
         // change email
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null) throw new ArgumentException("User not found");
         user.Email = email;
         user.UserName = email;
+        user.KEKSalt = KEKSalt;
+        user.EncryptedDEK = encryptedDEK;
         await _userManager.UpdateAsync(user);
     }
 

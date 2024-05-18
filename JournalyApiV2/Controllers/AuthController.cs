@@ -86,7 +86,7 @@ public class AuthController : JournalyControllerBase
     [HttpPost]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequest request)
     {
-        await _authService.ChangeEmail(request.Email, GetUserId());
+        await _authService.ChangeEmail(request.Email,  request.KEKSalt, request.EncryptedDEK, GetUserId());
         return StatusCode(204);
     }
 
