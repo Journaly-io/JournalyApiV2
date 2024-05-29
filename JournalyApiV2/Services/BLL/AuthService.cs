@@ -77,7 +77,7 @@ public class AuthService : IAuthService
         }
 
         var newUser = await _userManager.FindByEmailAsync(email);
-        if (email.EndsWith(".test")) await VerifyEmail(Guid.Parse(newUser.Id), newUser.Email, newUser.FirstName, newUser.LastName);
+        if (!email.EndsWith(".test")) await VerifyEmail(Guid.Parse(newUser.Id), newUser.Email, newUser.FirstName, newUser.LastName);
     }
 
     public async Task ChangeName(string firstName, string lastName, Guid userId)
