@@ -20,3 +20,4 @@ DELETE FROM "Medication";
 DELETE FROM "PasswordResetCode";
 DELETE FROM "SyncedRecords";
 DELETE FROM "UserToken";
+DELETE FROM "EncryptedDEK";

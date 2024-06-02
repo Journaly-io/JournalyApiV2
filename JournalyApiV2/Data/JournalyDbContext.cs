@@ -37,6 +37,8 @@ public class JournalyDbContext : IdentityDbContext<JournalyUser>
     public DbSet<Data.Models.UserToken> UserTokenStore { get; set; }
     public DbSet<EmailVerificationCode> EmailVerificationCodes { get; set; }
     public DbSet<PasswordResetCode> PasswordResetCodes { get; set; }
+    public DbSet<EncryptedDEKType> EncryptedDekTypes { get; set; }
+    public DbSet<EncryptedDEK> EncryptedDeks { get; set; }
     
     public JournalyDbContext(IConfiguration config)
     {
