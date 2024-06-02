@@ -107,9 +107,7 @@ public class AuthService : IAuthService
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null) throw new ArgumentException("User not found");
-        // TODO
-        // user.EncryptedDEK = encryptedDEK;
-        // user.KEKSalt = KEKSalt;
+        await _cryptoDbService.UpdateDEKForUser(userId, encryptedDEK, KEKSalt, EncryptedDEKType.Primary);
         var result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
         await _userManager.UpdateAsync(user);
 
@@ -178,6 +176,7 @@ public class AuthService : IAuthService
     public async Task<UserInfoResponse> GetUserInfoAsync(Guid userId)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
+        var dek = (await _cryptoDbService.GetDEKsForUser(userId, new[] { EncryptedDEKType.Primary })).Single();
         return new UserInfoResponse()
         {
             Email = user.Email,
@@ -185,18 +184,8 @@ public class AuthService : IAuthService
             FirstName = user.FirstName,
             LastName = user.LastName,
             Uuid = userId,
-            // TODO
-            // EncryptedDEK = user.EncryptedDEK,
-            // KEKSalt = user.KEKSalt
+            EncryptedDEK = dek.DEK,
+            KEKSalt = dek.Salt
         };
-    }
-
-    public async Task UpdateKEK(Guid userId, string wrappedDEK, string KEKSalt)
-    {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
-        // TODO
-        // user.EncryptedDEK = wrappedDEK;
-        // user.KEKSalt = KEKSalt;
-        await _userManager.UpdateAsync(user);
     }
 }

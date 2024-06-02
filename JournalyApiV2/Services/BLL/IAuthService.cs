@@ -19,5 +19,4 @@ public interface IAuthService
     Task ResendVerificationEmailAsync(Guid userId);
     Task SignOutEverywhereAsync(Guid userId, string initiatorToken);
     Task<UserInfoResponse> GetUserInfoAsync(Guid userId);
-    Task UpdateKEK(Guid userId, string wrappedDEK, string KEKSalt);
 }

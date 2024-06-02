@@ -38,7 +38,19 @@ public class CryptoDbService : ICryptoDbService
         });
     }
 
-    public async Task<EncryptedDEK[]> GetDEKsForUser(Guid user, EncryptedDEKType[] typeFilter = null)
+    public async Task UpdateDEKForUser(Guid user, string DEK, string salt, EncryptedDEKType type)
+    {
+        await using var db = _db.Journaly();
+        if (type == EncryptedDEKType.Hardware)
+            throw new ArgumentException("Hardware keys are not supported by this method as there may be multiple");
+
+        var dek = await db.EncryptedDeks.SingleAsync(x => x.Owner == user && x.EncryptedDEKTypeId == (short)type);
+        dek.DEK = DEK;
+        dek.Salt = salt;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task<EncryptedDEK[]> GetDEKsForUser(Guid user, EncryptedDEKType[]? typeFilter = null)
     {
         await using var db = _db.Journaly();
         if (typeFilter == null)
