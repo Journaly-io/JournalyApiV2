@@ -12,6 +12,7 @@ using JournalyApiV2.Models.Responses;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.DAL;
 using Microsoft.AspNetCore.Identity;
+using EncryptedDEKType = JournalyApiV2.Data.Enums.EncryptedDEKType;
 
 namespace JournalyApiV2.Services.BLL;
 
@@ -22,13 +23,15 @@ public class AuthService : IAuthService
     private readonly SignInManager<JournalyUser> _signInManager;
     private readonly IAuthDbService _authDbService;
     private readonly IEmailService _emailService;
-    public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager, IAuthDbService authDbService, IEmailService emailService)
+    private readonly ICryptoDbService _cryptoDbService;
+    public AuthService(UserManager<JournalyUser> userManager, IConfiguration config, SignInManager<JournalyUser> signInManager, IAuthDbService authDbService, IEmailService emailService, ICryptoDbService cryptoDbService)
     {
         _userManager = userManager;
         _config = config;
         _signInManager = signInManager;
         _authDbService = authDbService;
         _emailService = emailService;
+        _cryptoDbService = cryptoDbService;
     }
     
     public async Task<AuthenticationResponse> SignIn(string email, string password)
@@ -67,17 +70,14 @@ public class AuthService : IAuthService
             LastName = lastName,
             Email = email,
             UserName = email,
-            // TODO
-            // EncryptedDEK = encryptedDEK,
-            // KEKSalt = KEKSalt,
             EmailConfirmed = email.EndsWith(".test")
         }, password);
         if (!result.Succeeded)
         {
             throw new Exception(string.Join("\n", result.Errors.Select(x => x.Description)));
         }
-
         var newUser = await _userManager.FindByEmailAsync(email);
+        await _cryptoDbService.StoreNewDEKForUser(Guid.Parse(newUser.Id), encryptedDEK, KEKSalt, EncryptedDEKType.Primary);
         if (!email.EndsWith(".test")) await VerifyEmail(Guid.Parse(newUser.Id), newUser.Email, newUser.FirstName, newUser.LastName);
     }
 

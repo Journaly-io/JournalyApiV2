@@ -15,7 +15,10 @@ public class EncryptedDEK
     [Column("Owner")]
     public Guid Owner { get; set; }
     
-    [Column]
+    [Column("DEK")]
+    public string DEK { get; set; }
+    
+    [Column("Salt")]
     public string Salt { get; set; }
     
     [Column("Type")]

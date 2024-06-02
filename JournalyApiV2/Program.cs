@@ -87,6 +87,7 @@ builder.Services.AddScoped<ISyncDbService, SyncDbService>();
 builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMedService, MedService>();
+builder.Services.AddScoped<ICryptoDbService, CryptoDbService>();
 builder.Services.AddScoped<IMedDbService, MedDbService>();
 builder.Services.AddScoped<IAuthDbService, AuthDbService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -96,7 +97,6 @@ builder.Services.AddTransient<IDbFactory, DbFactory>(); // Use this instead
 builder.Services.AddScoped<IAuthorizationHandler, EmailConfirmedHandler>();
 
 var app = builder.Build();
-
 
 app.UseAuthentication();
 app.UseAuthorization();

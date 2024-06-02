@@ -249,6 +249,59 @@ namespace JournalyApiV2.Data.Migrations
                     b.ToTable("EmotionEntry");
                 });
 
+            modelBuilder.Entity("JournalyApiV2.Data.Models.EncryptedDEK", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DEK")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("DEK");
+
+                    b.Property<short>("EncryptedDEKTypeId")
+                        .HasColumnType("smallint")
+                        .HasColumnName("Type");
+
+                    b.Property<Guid>("Owner")
+                        .HasColumnType("uuid")
+                        .HasColumnName("Owner");
+
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Salt");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EncryptedDEKTypeId");
+
+                    b.ToTable("EncryptedDEK");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.EncryptedDEKType", b =>
+                {
+                    b.Property<short>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EncryptedDEKType");
+                });
+
             modelBuilder.Entity("JournalyApiV2.Data.Models.IconType", b =>
                 {
                     b.Property<short>("Id")
@@ -650,15 +703,7 @@ namespace JournalyApiV2.Data.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("EncryptedDEK")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("KEKSalt")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -911,6 +956,17 @@ namespace JournalyApiV2.Data.Migrations
                     b.Navigation("JournalEntry");
                 });
 
+            modelBuilder.Entity("JournalyApiV2.Data.Models.EncryptedDEK", b =>
+                {
+                    b.HasOne("JournalyApiV2.Data.Models.EncryptedDEKType", "Type")
+                        .WithMany("EncryptedDeks")
+                        .HasForeignKey("EncryptedDEKTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Type");
+                });
+
             modelBuilder.Entity("JournalyApiV2.Data.Models.JournalEntryCategoryValue", b =>
                 {
                     b.HasOne("JournalyApiV2.Data.Models.EmotionCategory", "EmotionCategory")
@@ -1070,6 +1126,11 @@ namespace JournalyApiV2.Data.Migrations
                     b.Navigation("Emotions");
 
                     b.Navigation("JournalEntryCategoryValues");
+                });
+
+            modelBuilder.Entity("JournalyApiV2.Data.Models.EncryptedDEKType", b =>
+                {
+                    b.Navigation("EncryptedDeks");
                 });
 
             modelBuilder.Entity("JournalyApiV2.Data.Models.IconType", b =>
