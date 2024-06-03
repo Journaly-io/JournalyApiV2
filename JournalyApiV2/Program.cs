@@ -9,6 +9,7 @@ using JournalyApiV2.Services.DAL;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,6 +98,8 @@ builder.Services.AddTransient<IDbFactory, DbFactory>(); // Use this instead
 builder.Services.AddScoped<IAuthorizationHandler, EmailConfirmedHandler>();
 
 var app = builder.Build();
+
+app.Services.GetService<IDbFactory>().Journaly().Database.Migrate();
 
 app.UseAuthentication();
 app.UseAuthorization();
