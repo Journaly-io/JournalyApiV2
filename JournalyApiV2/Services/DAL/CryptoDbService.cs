@@ -36,6 +36,7 @@ public class CryptoDbService : ICryptoDbService
             DEK = DEK,
             Salt = salt
         });
+        await db.SaveChangesAsync();
     }
 
     public async Task UpdateDEKForUser(Guid user, string DEK, string salt, EncryptedDEKType type)
@@ -55,7 +56,7 @@ public class CryptoDbService : ICryptoDbService
         await using var db = _db.Journaly();
         if (typeFilter == null)
             return await db.EncryptedDeks.Where(x => x.Owner == user).ToArrayAsync();
-        return await db.EncryptedDeks.Where(x => x.Owner == user && typeFilter.Select(x => (int)x).Contains(x.EncryptedDEKTypeId))
+        return await db.EncryptedDeks.Where(x => x.Owner == user && typeFilter.Select(y => (int)y).Contains(x.EncryptedDEKTypeId))
             .ToArrayAsync();
     }
 }
