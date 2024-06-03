@@ -100,6 +100,7 @@ builder.Services.AddScoped<IAuthorizationHandler, EmailConfirmedHandler>();
 var app = builder.Build();
 
 app.Services.GetService<IDbFactory>().Journaly().Database.Migrate();
+Console.WriteLine("Updated database");
 
 app.UseAuthentication();
 app.UseAuthorization();
