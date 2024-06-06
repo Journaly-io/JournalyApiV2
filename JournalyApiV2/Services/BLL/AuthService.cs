@@ -188,4 +188,12 @@ public class AuthService : IAuthService
             KEKSalt = dek.Salt
         };
     }
+
+    public async Task BeginAccountRecovery(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null) return; // We will pretend this worked even if the email is not found;
+        var codes = await _authDbService.GetOrCreateEmailVerificationCode(Guid.Parse(user.Id));
+        await _emailService.SendAccountRecoveryEmailAsync(user.Email, user.FirstName, user.LastName, codes);
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using JournalyApiV2.Data.Enums;
 using JournalyApiV2.Models;
 using JournalyApiV2.Models.Requests;
 using JournalyApiV2.Pipeline;
@@ -14,10 +15,12 @@ namespace JournalyApiV2.Controllers;
 public class AuthController : JournalyControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly ICryptoService _cryptoService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, ICryptoService cryptoService)
     {
         _authService = authService;
+        _cryptoService = cryptoService;
     }
 
     [Route("new-user")]
@@ -27,7 +30,8 @@ public class AuthController : JournalyControllerBase
     {
         try
         {
-            await _authService.CreateUser(request.Email, request.Password, request.FirstName, request.LastName, request.EncryptedDEK, request.KEKSalt);
+            await _authService.CreateUser(request.Email, request.Password, request.FirstName, request.LastName,
+                request.EncryptedDEK, request.KEKSalt);
         }
         catch (ArgumentException ex)
         {
@@ -92,15 +96,15 @@ public class AuthController : JournalyControllerBase
     }
 
     [Route("change-password")]
-    // This is to bypass the email-confirmed policy. This is in case the user makes an account and signs out before they verify their email and forget their password
-    [AllowAnonymous]
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         try
         {
-            await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword, request.encryptedDEK, request.KEKSalt, Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", ""), request.SignOutEverywhere);
+            await _authService.ChangePassword(GetUserId(), request.OldPassword, request.NewPassword,
+                request.encryptedDEK, request.KEKSalt,
+                Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", ""),
+                request.SignOutEverywhere);
         }
         catch (ArgumentException)
         {
@@ -176,7 +180,8 @@ public class AuthController : JournalyControllerBase
     [HttpGet]
     public async Task<IActionResult> SignOutEverywhere()
     {
-        await _authService.SignOutEverywhereAsync(GetUserId(), Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", ""));
+        await _authService.SignOutEverywhereAsync(GetUserId(),
+            Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", ""));
         return StatusCode(204);
     }
 
@@ -190,4 +195,22 @@ public class AuthController : JournalyControllerBase
         var result = await _authService.GetUserInfoAsync(GetUserId());
         return new JsonResult(result);
     }
+
+    [Route("upload-key")]
+    [HttpPost]
+    public async Task<IActionResult> UploadKey([FromBody] UploadKeyRequest request)
+    {
+        await _cryptoService.StoreNewDEKForUser(GetUserId(), request.DEK, request.Salt, (EncryptedDEKType)request.Type);
+        return StatusCode(204);
+    }
+
+    [Route("begin-account-recovery")]
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> BeginAccountRecovery([FromBody] BeginAccountRecoveryRequest request)
+    {
+        await _authService.BeginAccountRecovery(request.Email);
+        return StatusCode(204); // We will pretend this worked even if the email is not found
+    }
+
 }

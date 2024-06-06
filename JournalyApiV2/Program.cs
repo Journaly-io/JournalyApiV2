@@ -89,6 +89,7 @@ builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMedService, MedService>();
 builder.Services.AddScoped<ICryptoDbService, CryptoDbService>();
+builder.Services.AddScoped<ICryptoService, CryptoService>();
 builder.Services.AddScoped<IMedDbService, MedDbService>();
 builder.Services.AddScoped<IAuthDbService, AuthDbService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
