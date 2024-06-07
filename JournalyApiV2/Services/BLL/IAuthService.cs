@@ -17,4 +17,6 @@ public interface IAuthService
     Task SignOutEverywhereAsync(Guid userId, string initiatorToken);
     Task<UserInfoResponse> GetUserInfoAsync(Guid userId);
     Task BeginAccountRecovery(string email);
+    Task<string> IssueRecoveryTokenWithShortCode(Guid userId, string shortCode);
+    Task<string> IssueRecoveryTokenWithLongCode(string longCode);
 }

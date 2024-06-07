@@ -138,8 +138,8 @@ public class AuthService : IAuthService
         var userObj = await _userManager.FindByIdAsync(user.Value.ToString());
 
         userObj.EmailConfirmed = true;
-
         await _userManager.UpdateAsync(userObj);
+        await _authDbService.ClearEmailVerificationCodes(user.Value);
     }
 
     public async Task VerifyEmailWithShortCode(Guid userId, string shortCode)
@@ -153,6 +153,7 @@ public class AuthService : IAuthService
             user.EmailConfirmed = true;
             await _userManager.UpdateAsync(user);
             await _authDbService.VerifyUser(userId);
+            await _authDbService.ClearEmailVerificationCodes(userId);
         }
         else
         {
@@ -177,7 +178,7 @@ public class AuthService : IAuthService
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         var dek = (await _cryptoDbService.GetDEKsForUser(userId, new[] { EncryptedDEKType.Primary })).Single();
-        return new UserInfoResponse()
+        return new UserInfoResponse
         {
             Email = user.Email,
             EmailVerified = user.EmailConfirmed,
@@ -195,5 +196,20 @@ public class AuthService : IAuthService
         if (user == null) return; // We will pretend this worked even if the email is not found;
         var codes = await _authDbService.GetOrCreateEmailVerificationCode(Guid.Parse(user.Id));
         await _emailService.SendAccountRecoveryEmailAsync(user.Email, user.FirstName, user.LastName, codes);
+    }
+
+    public async Task<string> IssueRecoveryTokenWithShortCode(Guid userId, string shortCode)
+    {
+        if (!await _authDbService.CheckShortCode(userId, shortCode))
+            throw new HttpBadRequestException("Invalid short code or short code does not match user ID");
+        await _authDbService.ClearEmailVerificationCodes(userId);
+        return await _authDbService.IssueRecoveryToken(userId);
+    }
+
+    public async Task<string> IssueRecoveryTokenWithLongCode(string longCode)
+    {
+        var user = await _authDbService.GetUserByLongCode(longCode);
+        if (user == null) throw new HttpBadRequestException("Long code not found");
+        return await _authDbService.IssueRecoveryToken(user.Value);
     }
 }

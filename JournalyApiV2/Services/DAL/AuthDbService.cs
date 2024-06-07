@@ -97,11 +97,17 @@ public class AuthDbService : IAuthDbService
         await using var db = _db.Journaly();
         var code = await db.EmailVerificationCodes.SingleOrDefaultAsync(x =>
             x.User == userId && x.ShortCode == shortCode);
-
         return code != null;
     }
 
-    public async Task<string?> GetPasswordResetCode(Guid userId)
+    public async Task ClearEmailVerificationCodes(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        db.RemoveRange(db.EmailVerificationCodes.Where(x => x.User == userId));
+        await db.SaveChangesAsync();
+    }
+
+public async Task<string?> GetPasswordResetCode(Guid userId)
     {
         await using var db = _db.Journaly();
         var code = await db.PasswordResetCodes.SingleOrDefaultAsync(x => x.User == userId);
@@ -158,10 +164,7 @@ public class AuthDbService : IAuthDbService
     public async Task<string> GenerateToken(Guid userId)
     {
         await using var db = _db.Journaly();
-        using var randomNumberGenerator = RandomNumberGenerator.Create();
-        var randomNumber = new byte[32];
-        randomNumberGenerator.GetBytes(randomNumber);
-        var token = Convert.ToBase64String(randomNumber);
+        var token = GenerateSecureOpaqueToken();
         db.UserTokenStore.Add(new UserToken
         {
             Token = token,
@@ -199,5 +202,30 @@ public class AuthDbService : IAuthDbService
             db.UserTokenStore.RemoveRange(userTokens);
             await db.SaveChangesAsync();
         }
+    }
+
+    public async Task<string> IssueRecoveryToken(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        var token = GenerateSecureOpaqueToken();
+        db.AccountRecoveryTokens.Add(new AccountRecoveryToken
+        {
+            Token = token,
+            UserId = userId
+        });
+        await db.SaveChangesAsync();
+        return token;
+    }
+
+    public async Task<Guid?> SpendRecoveryToken(string recoveryToken)
+    {
+        await using var db = _db.Journaly();
+        var token = await db.AccountRecoveryTokens.SingleOrDefaultAsync(x => x.Token == recoveryToken);
+        if (token != null)
+        {
+            db.Remove(token);
+            await db.SaveChangesAsync();
+        }
+        return token?.UserId;
     }
 }

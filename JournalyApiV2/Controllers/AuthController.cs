@@ -2,11 +2,13 @@
 using JournalyApiV2.Data.Enums;
 using JournalyApiV2.Models;
 using JournalyApiV2.Models.Requests;
+using JournalyApiV2.Models.Responses;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.BLL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
+using SendGrid.Helpers.Errors.Model;
 
 namespace JournalyApiV2.Controllers;
 
@@ -213,4 +215,21 @@ public class AuthController : JournalyControllerBase
         return StatusCode(204); // We will pretend this worked even if the email is not found
     }
 
+    [Route("verify-email-for-account-recovery")]
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<JsonResult> VerifyEmailForAccountRecovery([FromBody] VerifyEmailRequest request)
+    {
+        if (!string.IsNullOrEmpty(request.LongCode))
+            return new JsonResult(new AuthenticationResponse
+            {
+                Token = await _authService.IssueRecoveryTokenWithLongCode(request.LongCode)
+            });
+        if (!string.IsNullOrEmpty(request.ShortCode))
+            return new JsonResult(new AuthenticationResponse
+            {
+                Token = await _authService.IssueRecoveryTokenWithShortCode(GetUserId(), request.ShortCode)
+            });
+        throw new BadRequestException("No recovery code provided");
+    }
 }
