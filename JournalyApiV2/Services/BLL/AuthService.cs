@@ -198,10 +198,13 @@ public class AuthService : IAuthService
         await _emailService.SendAccountRecoveryEmailAsync(user.Email, user.FirstName, user.LastName, codes);
     }
 
-    public async Task<string> IssueRecoveryTokenWithShortCode(Guid userId, string shortCode)
+    public async Task<string> IssueRecoveryTokenWithShortCode(string email, string shortCode)
     {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null) throw new HttpBadRequestException("Invalid short code or short code does not match email");
+        var userId = Guid.Parse(user.Id);
         if (!await _authDbService.CheckShortCode(userId, shortCode))
-            throw new HttpBadRequestException("Invalid short code or short code does not match user ID");
+            throw new HttpBadRequestException("Invalid short code or short code does not match email");
         await _authDbService.ClearEmailVerificationCodes(userId);
         return await _authDbService.IssueRecoveryToken(userId);
     }

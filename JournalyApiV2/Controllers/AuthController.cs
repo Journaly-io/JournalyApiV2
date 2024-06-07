@@ -225,11 +225,12 @@ public class AuthController : JournalyControllerBase
             {
                 Token = await _authService.IssueRecoveryTokenWithLongCode(request.LongCode)
             });
-        if (!string.IsNullOrEmpty(request.ShortCode))
-            return new JsonResult(new AuthenticationResponse
-            {
-                Token = await _authService.IssueRecoveryTokenWithShortCode(GetUserId(), request.ShortCode)
-            });
-        throw new BadRequestException("No recovery code provided");
+        if (string.IsNullOrEmpty(request.ShortCode)) throw new BadRequestException("No recovery code provided");
+        if (string.IsNullOrEmpty(request.Email))
+            throw new BadHttpRequestException("Short code provided but no email provided where it is required");
+        return new JsonResult(new AuthenticationResponse
+        {
+            Token = await _authService.IssueRecoveryTokenWithShortCode(request.Email, request.ShortCode)
+        });
     }
 }
