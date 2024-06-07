@@ -236,7 +236,7 @@ public class AuthController : JournalyControllerBase
 
     [Route("get-recovery-keys")]
     [AllowAnonymous]
-    [HttpPost]
+    [HttpGet]
     public async Task<JsonResult> GetRecoveryKeys()
     {
         return new JsonResult(await _authService.GetRecoveryKeys(GetRecoveryToken()));
