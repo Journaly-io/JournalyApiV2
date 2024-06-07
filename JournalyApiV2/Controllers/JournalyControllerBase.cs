@@ -46,4 +46,20 @@ public class JournalyControllerBase : ControllerBase
 
         return deviceId;
     }
+
+    protected string GetRecoveryToken()
+    {
+        StringValues recoveryTokenRaw;
+        if (!HttpContext.Request.Headers.TryGetValue("RecoveryToken", out recoveryTokenRaw))
+        {
+            throw new ArgumentException("You must specify a recovery token for this operation");
+        }
+
+        if (recoveryTokenRaw.Count != 1)
+        {
+            throw new ArgumentException("Exactly 1 recovery token can be specified");
+        }
+
+        return recoveryTokenRaw[0];
+    }
 }

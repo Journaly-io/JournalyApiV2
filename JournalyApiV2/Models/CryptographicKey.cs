@@ -1,6 +1,6 @@
 ﻿namespace JournalyApiV2.Models.Requests;
 
-public class UploadKeyRequest
+public class CryptographicKey
 {
     public string DEK { get; set; }
     public string Salt { get; set; }

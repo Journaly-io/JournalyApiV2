@@ -1,4 +1,5 @@
-﻿using JournalyApiV2.Models.Responses;
+﻿using JournalyApiV2.Models.Requests;
+using JournalyApiV2.Models.Responses;
 
 namespace JournalyApiV2.Services.BLL;
 
@@ -19,4 +20,5 @@ public interface IAuthService
     Task BeginAccountRecovery(string email);
     Task<string> IssueRecoveryTokenWithShortCode(string email, string shortCode);
     Task<string> IssueRecoveryTokenWithLongCode(string longCode);
+    Task<CryptographicKey[]> GetRecoveryKeys(string recoveryToken);
 }

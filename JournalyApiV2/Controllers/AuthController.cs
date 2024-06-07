@@ -200,7 +200,7 @@ public class AuthController : JournalyControllerBase
 
     [Route("upload-key")]
     [HttpPost]
-    public async Task<IActionResult> UploadKey([FromBody] UploadKeyRequest request)
+    public async Task<IActionResult> UploadKey([FromBody] CryptographicKey request)
     {
         await _cryptoService.StoreNewDEKForUser(GetUserId(), request.DEK, request.Salt, (EncryptedDEKType)request.Type);
         return StatusCode(204);
@@ -232,5 +232,13 @@ public class AuthController : JournalyControllerBase
         {
             Token = await _authService.IssueRecoveryTokenWithShortCode(request.Email, request.ShortCode)
         });
+    }
+
+    [Route("get-recovery-keys")]
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<JsonResult> GetRecoveryKeys()
+    {
+        return new JsonResult(await _authService.GetRecoveryKeys(GetRecoveryToken()));
     }
 }

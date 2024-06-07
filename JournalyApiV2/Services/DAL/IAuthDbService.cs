@@ -1,4 +1,5 @@
 ﻿using JournalyApiV2.Models;
+using JournalyApiV2.Models.Requests;
 
 namespace JournalyApiV2.Services.DAL;
 
@@ -20,5 +21,5 @@ public interface IAuthDbService
     Task RevokeToken(string token);
     Task RevokeTokens(Guid userId, string[]? exclude);
     Task<string> IssueRecoveryToken(Guid userId);
-    Task<Guid?> SpendRecoveryToken(string recoveryToken);
+    Task<CryptographicKey[]> GetRecoveryKeys(string recoveryToken);
 }

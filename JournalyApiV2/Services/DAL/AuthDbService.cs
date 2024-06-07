@@ -2,6 +2,8 @@
 using JournalyApiV2.Data;
 using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
+using JournalyApiV2.Models.Requests;
+using JournalyApiV2.Pipeline;
 using Microsoft.EntityFrameworkCore;
 
 namespace JournalyApiV2.Services.DAL;
@@ -217,15 +219,18 @@ public async Task<string?> GetPasswordResetCode(Guid userId)
         return token;
     }
 
-    public async Task<Guid?> SpendRecoveryToken(string recoveryToken)
+    public async Task<CryptographicKey[]> GetRecoveryKeys(string recoveryToken)
     {
         await using var db = _db.Journaly();
-        var token = await db.AccountRecoveryTokens.SingleOrDefaultAsync(x => x.Token == recoveryToken);
-        if (token != null)
+        var userId = (await db.AccountRecoveryTokens.SingleOrDefaultAsync(x => x.Token == recoveryToken))?.UserId;
+        if (userId == null) throw new HttpBadRequestException("Invalid recovery token");
+        var dbDeks = await db.EncryptedDeks.Where(x => x.EncryptedDEKTypeId != (int)Data.Enums.EncryptedDEKType.Primary)
+            .ToArrayAsync();
+        return dbDeks.Select(x => new CryptographicKey
         {
-            db.Remove(token);
-            await db.SaveChangesAsync();
-        }
-        return token?.UserId;
+            DEK = x.DEK,
+            Salt = x.Salt,
+            Type = x.EncryptedDEKTypeId
+        }).ToArray();
     }
 }

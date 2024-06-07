@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using JournalyApiV2.Data;
 using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
+using JournalyApiV2.Models.Requests;
 using JournalyApiV2.Models.Responses;
 using JournalyApiV2.Pipeline;
 using JournalyApiV2.Services.DAL;
@@ -214,5 +215,10 @@ public class AuthService : IAuthService
         var user = await _authDbService.GetUserByLongCode(longCode);
         if (user == null) throw new HttpBadRequestException("Long code not found");
         return await _authDbService.IssueRecoveryToken(user.Value);
+    }
+
+    public async Task<CryptographicKey[]> GetRecoveryKeys(string recoveryToken)
+    {
+        return await _authDbService.GetRecoveryKeys(recoveryToken);
     }
 }
