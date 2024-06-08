@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using System.Security.Cryptography.Xml;
 using JournalyApiV2.Data;
 using JournalyApiV2.Data.Models;
 using JournalyApiV2.Models;
@@ -232,5 +233,21 @@ public async Task<string?> GetPasswordResetCode(Guid userId)
             Salt = x.Salt,
             Type = x.EncryptedDEKTypeId
         }).ToArray();
+    }
+
+    public async Task ClearRecoveryTokens(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        db.RemoveRange(db.AccountRecoveryTokens.Where(x => x.UserId == userId));
+        await db.SaveChangesAsync();
+    }
+
+    public async Task<Guid?> GetUserIdFromRecoveryToken(string recoveryToken)
+    {
+        await using var db = _db.Journaly();
+
+        var recoveryTokenObj = await db.AccountRecoveryTokens.SingleOrDefaultAsync(x => x.Token == recoveryToken);
+
+        return recoveryTokenObj?.UserId;
     }
 }

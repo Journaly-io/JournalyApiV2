@@ -22,4 +22,6 @@ public interface IAuthDbService
     Task RevokeTokens(Guid userId, string[]? exclude);
     Task<string> IssueRecoveryToken(Guid userId);
     Task<CryptographicKey[]> GetRecoveryKeys(string recoveryToken);
+    Task ClearRecoveryTokens(Guid userId);
+    Task<Guid?> GetUserIdFromRecoveryToken(string recoveryToken);
 }

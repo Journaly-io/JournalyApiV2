@@ -57,6 +57,11 @@ public class AuthService : IAuthService
         }
     }
 
+    public async Task<string> IssueToken(Guid userId)
+    {
+        return await _authDbService.GenerateToken(userId);
+    }
+    
     public async Task VoidToken(string token)
     {
         await _authDbService.RevokeToken(token);
@@ -220,5 +225,21 @@ public class AuthService : IAuthService
     public async Task<CryptographicKey[]> GetRecoveryKeys(string recoveryToken)
     {
         return await _authDbService.GetRecoveryKeys(recoveryToken);
+    }
+
+    public async Task RecoverAccount(Guid userId, string passwordHash, CryptographicKey primaryKey)
+    {
+        if (primaryKey.Type != 1) throw new ArgumentException("Key must be a primary key");
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null) throw new ArgumentException("UserID invalid");
+        var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        await _userManager.ResetPasswordAsync(user, resetToken, passwordHash);
+        await _cryptoDbService.UpdateDEKForUser(userId, primaryKey.DEK, primaryKey.Salt, EncryptedDEKType.Primary);
+        await _authDbService.ClearRecoveryTokens(userId);
+    }
+
+    public async Task<Guid?> GetUserIdFromRecoveryToken(string recoveryToken)
+    {
+        return await _authDbService.GetUserIdFromRecoveryToken(recoveryToken);
     }
 }

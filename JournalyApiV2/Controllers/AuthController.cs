@@ -18,7 +18,7 @@ public class AuthController : JournalyControllerBase
 {
     private readonly IAuthService _authService;
     private readonly ICryptoService _cryptoService;
-
+    
     public AuthController(IAuthService authService, ICryptoService cryptoService)
     {
         _authService = authService;
@@ -240,5 +240,24 @@ public class AuthController : JournalyControllerBase
     public async Task<JsonResult> GetRecoveryKeys()
     {
         return new JsonResult(await _authService.GetRecoveryKeys(GetRecoveryToken()));
+    }
+
+    [Route("recover-account")]
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<JsonResult> RecoverAccount([FromBody] RecoverAccountRequest request)
+    {
+        var userId = await _authService.GetUserIdFromRecoveryToken(GetRecoveryToken());
+        if (userId == null) throw new BadRequestException("Invalid recovery token");
+        await _authService.RecoverAccount(userId.Value, request.passwordHash, new CryptographicKey
+        {
+            DEK = request.DEK,
+            Salt = request.Salt,
+            Type = (int)EncryptedDEKType.Primary
+        });
+        return new JsonResult(new AuthenticationResponse
+        {
+            Token = await _authService.IssueToken(userId.Value)
+        });
     }
 }

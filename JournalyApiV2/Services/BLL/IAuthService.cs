@@ -21,4 +21,7 @@ public interface IAuthService
     Task<string> IssueRecoveryTokenWithShortCode(string email, string shortCode);
     Task<string> IssueRecoveryTokenWithLongCode(string longCode);
     Task<CryptographicKey[]> GetRecoveryKeys(string recoveryToken);
+    Task RecoverAccount(Guid userId, string passwordHash, CryptographicKey primaryKey);
+    Task<Guid?> GetUserIdFromRecoveryToken(string recoveryToken);
+    Task<string> IssueToken(Guid userId);
 }
