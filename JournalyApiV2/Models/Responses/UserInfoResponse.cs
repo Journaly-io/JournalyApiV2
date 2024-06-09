@@ -7,6 +7,7 @@ public class UserInfoResponse
     public string LastName { get; set; }
     public string Email { get; set; }
     public bool EmailVerified { get; set; }
+    public bool HasRecoveryKeys { get; set; }
     public string EncryptedDEK { get; set; }
     public string KEKSalt { get; set; }
 }

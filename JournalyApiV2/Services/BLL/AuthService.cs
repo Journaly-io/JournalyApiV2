@@ -184,6 +184,7 @@ public class AuthService : IAuthService
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         var dek = (await _cryptoDbService.GetDEKsForUser(userId, new[] { EncryptedDEKType.Primary })).Single();
+        var hasRecoveryKeys = (await _authDbService.GetRecoveryKeys(userId)).Any();
         return new UserInfoResponse
         {
             Email = user.Email,
@@ -192,7 +193,8 @@ public class AuthService : IAuthService
             LastName = user.LastName,
             Uuid = userId,
             EncryptedDEK = dek.DEK,
-            KEKSalt = dek.Salt
+            KEKSalt = dek.Salt,
+            HasRecoveryKeys = hasRecoveryKeys
         };
     }
 

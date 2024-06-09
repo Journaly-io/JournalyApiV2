@@ -6,6 +6,7 @@ using JournalyApiV2.Models;
 using JournalyApiV2.Models.Requests;
 using JournalyApiV2.Pipeline;
 using Microsoft.EntityFrameworkCore;
+using EncryptedDEKType = JournalyApiV2.Data.Enums.EncryptedDEKType;
 
 namespace JournalyApiV2.Services.DAL;
 
@@ -233,6 +234,18 @@ public async Task<string?> GetPasswordResetCode(Guid userId)
             Salt = x.Salt,
             Type = x.EncryptedDEKTypeId
         }).ToArray();
+    }
+ 
+    public async Task<CryptographicKey[]> GetRecoveryKeys(Guid userId)
+    {
+        await using var db = _db.Journaly();
+        return (await db.EncryptedDeks.Where(x => x.Type.Id != (short)EncryptedDEKType.Primary && x.Owner == userId)
+            .ToArrayAsync()).Select(x => new CryptographicKey
+            {
+                DEK = x.DEK,
+                Salt = x.Salt,
+                Type = (int)x.Type.Id
+            }).ToArray();
     }
 
     public async Task ClearRecoveryTokens(Guid userId)
