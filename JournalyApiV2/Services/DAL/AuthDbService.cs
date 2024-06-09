@@ -239,7 +239,7 @@ public async Task<string?> GetPasswordResetCode(Guid userId)
     public async Task<CryptographicKey[]> GetRecoveryKeys(Guid userId)
     {
         await using var db = _db.Journaly();
-        return (await db.EncryptedDeks.Where(x => x.Type.Id != (short)EncryptedDEKType.Primary && x.Owner == userId)
+        return (await db.EncryptedDeks.Where(x => x.EncryptedDEKTypeId != (short)EncryptedDEKType.Primary && x.Owner == userId)
             .ToArrayAsync()).Select(x => new CryptographicKey
             {
                 DEK = x.DEK,
