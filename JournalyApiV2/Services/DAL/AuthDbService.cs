@@ -244,7 +244,7 @@ public async Task<string?> GetPasswordResetCode(Guid userId)
             {
                 DEK = x.DEK,
                 Salt = x.Salt,
-                Type = (int)x.Type.Id
+                Type = x.EncryptedDEKTypeId
             }).ToArray();
     }
 
