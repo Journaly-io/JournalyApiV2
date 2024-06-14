@@ -221,6 +221,7 @@ public class AuthService : IAuthService
     {
         var user = await _authDbService.GetUserByLongCode(longCode);
         if (user == null) throw new HttpBadRequestException("Long code not found");
+        await _authDbService.ClearEmailVerificationCodes(user.Value);
         return await _authDbService.IssueRecoveryToken(user.Value);
     }
 
